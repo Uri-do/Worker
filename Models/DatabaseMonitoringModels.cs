@@ -1,3 +1,5 @@
+using System.ComponentModel.DataAnnotations;
+
 namespace MonitoringWorker.Models;
 
 /// <summary>
@@ -253,4 +255,92 @@ public class EnvironmentStats
     /// Average response time
     /// </summary>
     public double AverageResponseTimeMs { get; set; }
+}
+
+/// <summary>
+/// Database connection DTO (excludes sensitive connection string)
+/// </summary>
+public class DatabaseConnectionDto
+{
+    public Guid ConnectionId { get; set; }
+    public string ConnectionName { get; set; } = string.Empty;
+    public string Provider { get; set; } = string.Empty;
+    public string Environment { get; set; } = string.Empty;
+    public List<string> Tags { get; set; } = new();
+    public int ConnectionTimeoutSeconds { get; set; }
+    public int CommandTimeoutSeconds { get; set; }
+    public bool IsEnabled { get; set; }
+    public DateTime CreatedDate { get; set; }
+    public DateTime ModifiedDate { get; set; }
+}
+
+/// <summary>
+/// Create database connection request
+/// </summary>
+public class CreateDatabaseConnectionRequest
+{
+    [Required(ErrorMessage = "Connection name is required")]
+    [StringLength(100, ErrorMessage = "Connection name must not exceed 100 characters")]
+    public string ConnectionName { get; set; } = string.Empty;
+
+    [Required(ErrorMessage = "Provider is required")]
+    public string Provider { get; set; } = string.Empty;
+
+    [Required(ErrorMessage = "Connection string is required")]
+    public string ConnectionString { get; set; } = string.Empty;
+
+    [Required(ErrorMessage = "Environment is required")]
+    public string Environment { get; set; } = string.Empty;
+
+    public List<string>? Tags { get; set; }
+
+    [Range(1, 300, ErrorMessage = "Connection timeout must be between 1 and 300 seconds")]
+    public int ConnectionTimeoutSeconds { get; set; } = 30;
+
+    [Range(1, 300, ErrorMessage = "Command timeout must be between 1 and 300 seconds")]
+    public int CommandTimeoutSeconds { get; set; } = 30;
+
+    public bool IsEnabled { get; set; } = true;
+}
+
+/// <summary>
+/// Update database connection request
+/// </summary>
+public class UpdateDatabaseConnectionRequest
+{
+    [Required(ErrorMessage = "Connection name is required")]
+    [StringLength(100, ErrorMessage = "Connection name must not exceed 100 characters")]
+    public string ConnectionName { get; set; } = string.Empty;
+
+    [Required(ErrorMessage = "Provider is required")]
+    public string Provider { get; set; } = string.Empty;
+
+    public string? ConnectionString { get; set; } // Optional for updates
+
+    [Required(ErrorMessage = "Environment is required")]
+    public string Environment { get; set; } = string.Empty;
+
+    public List<string>? Tags { get; set; }
+
+    [Range(1, 300, ErrorMessage = "Connection timeout must be between 1 and 300 seconds")]
+    public int ConnectionTimeoutSeconds { get; set; } = 30;
+
+    [Range(1, 300, ErrorMessage = "Command timeout must be between 1 and 300 seconds")]
+    public int CommandTimeoutSeconds { get; set; } = 30;
+
+    public bool IsEnabled { get; set; } = true;
+}
+
+/// <summary>
+/// Paginated result wrapper
+/// </summary>
+public class PagedResult<T>
+{
+    public List<T> Items { get; set; } = new();
+    public int TotalCount { get; set; }
+    public int PageNumber { get; set; }
+    public int PageSize { get; set; }
+    public int TotalPages { get; set; }
+    public bool HasNextPage { get; set; }
+    public bool HasPreviousPage { get; set; }
 }

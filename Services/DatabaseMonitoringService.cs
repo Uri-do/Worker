@@ -1,4 +1,5 @@
 using Microsoft.Data.SqlClient;
+using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Options;
 using MonitoringWorker.Configuration;
 using MonitoringWorker.Models;
@@ -16,14 +17,18 @@ public class DatabaseMonitoringService : IDatabaseMonitoringService
     private readonly ILogger<DatabaseMonitoringService> _logger;
     private readonly DatabaseMonitoringOptions _options;
     private readonly SemaphoreSlim _connectionSemaphore;
+    private readonly IMemoryCache _cache;
     private readonly ConcurrentDictionary<string, DatabaseMonitoringStats> _statsCache = new();
+    private static readonly TimeSpan DefaultCacheDuration = TimeSpan.FromMinutes(5);
 
     public DatabaseMonitoringService(
         ILogger<DatabaseMonitoringService> logger,
-        IOptions<DatabaseMonitoringOptions> options)
+        IOptions<DatabaseMonitoringOptions> options,
+        IMemoryCache cache)
     {
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         _options = options?.Value ?? throw new ArgumentNullException(nameof(options));
+        _cache = cache ?? throw new ArgumentNullException(nameof(cache));
         _connectionSemaphore = new SemaphoreSlim(_options.MaxConcurrentConnections, _options.MaxConcurrentConnections);
     }
 

@@ -7,6 +7,7 @@ using MonitoringWorker.Configuration;
 using MonitoringWorker.HealthChecks;
 using MonitoringWorker.Hubs;
 using MonitoringWorker.Jobs;
+using MonitoringWorker.Middleware;
 using MonitoringWorker.Models;
 using MonitoringWorker.Services;
 using Polly;
@@ -16,15 +17,8 @@ using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Serilog configuration
-builder.Host.UseSerilog((context, services, configuration) => configuration
-    .ReadFrom.Configuration(context.Configuration)
-    .ReadFrom.Services(services)
-    .Enrich.FromLogContext()
-    .Enrich.WithMachineName()
-    .Enrich.WithThreadId()
-    .Enrich.WithEnvironmentName()
-    .WriteTo.Console());
+// Enhanced Serilog configuration
+builder.Host.ConfigureLogging(builder.Configuration);
 
 // Configuration with validation
 builder.Services.AddOptions<MonitoringOptions>()
@@ -48,9 +42,11 @@ builder.Services.AddOptions<DatabaseMonitoringOptions>()
     .ValidateOnStart();
 
 // Core services
+builder.Services.AddMemoryCache();
 builder.Services.AddSingleton<IEventNotificationService, EventNotificationService>();
 builder.Services.AddSingleton<IMetricsService, MetricsService>();
 builder.Services.AddSingleton<IConfigurationService, ConfigurationService>();
+builder.Services.AddSingleton<IConfigurationValidationService, ConfigurationValidationService>();
 builder.Services.AddScoped<IMonitoringService, MonitoringService>();
 builder.Services.AddScoped<IAuthenticationService, AuthenticationService>();
 builder.Services.AddScoped<IDatabaseMonitoringService, DatabaseMonitoringService>();
@@ -222,12 +218,15 @@ builder.Services.AddSignalR(options =>
 
 // Health checks
 builder.Services.AddHealthChecks()
-    .AddCheck<LivenessHealthCheck>("liveness", 
+    .AddCheck<LivenessHealthCheck>("liveness",
         failureStatus: HealthStatus.Unhealthy,
         tags: new[] { "live" })
-    .AddCheck<ReadinessHealthCheck>("readiness", 
+    .AddCheck<ReadinessHealthCheck>("readiness",
         failureStatus: HealthStatus.Unhealthy,
-        tags: new[] { "ready" });
+        tags: new[] { "ready" })
+    .AddCheck<ConfigurationHealthCheck>("configuration",
+        failureStatus: HealthStatus.Unhealthy,
+        tags: new[] { "ready", "config" });
 
 // CORS for SignalR (configure for production)
 builder.Services.AddCors(options =>
@@ -285,6 +284,9 @@ else
 
 app.UseRouting();
 app.UseCors("SignalRPolicy");
+
+// API response middleware for consistent formatting
+app.UseMiddleware<ApiResponseMiddleware>();
 
 // Authentication and authorization
 if (authOptions?.Enabled == true)

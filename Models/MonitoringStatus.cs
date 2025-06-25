@@ -19,9 +19,19 @@ public enum MonitoringStatus
     /// The monitored endpoint is unhealthy but reachable
     /// </summary>
     Unhealthy = 2,
-    
+
+    /// <summary>
+    /// The monitored endpoint has warning conditions
+    /// </summary>
+    Warning = 3,
+
+    /// <summary>
+    /// The monitored endpoint is in a critical state
+    /// </summary>
+    Critical = 4,
+
     /// <summary>
     /// An error occurred while checking the endpoint
     /// </summary>
-    Error = 3
+    Error = 5
 }

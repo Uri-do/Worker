@@ -126,6 +126,16 @@ public class ConfigurationValidationResult
     /// Validation warning messages
     /// </summary>
     public List<string> Warnings { get; set; } = new();
+
+    /// <summary>
+    /// Configuration section that was validated
+    /// </summary>
+    public string Section { get; set; } = string.Empty;
+
+    /// <summary>
+    /// Additional validation details
+    /// </summary>
+    public Dictionary<string, object> Details { get; set; } = new();
 }
 
 /// <summary>

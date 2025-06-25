@@ -437,7 +437,7 @@ public class DatabaseMonitoringController : ControllerBase
     [ProducesResponseType(typeof(object), 200)]
     [ProducesResponseType(401)]
     [ProducesResponseType(403)]
-    public async Task<IActionResult> GetMonitoringTrends(
+    public Task<IActionResult> GetMonitoringTrends(
         [FromQuery] string period = "24h",
         [FromQuery] string groupBy = "hour")
     {
@@ -465,12 +465,12 @@ public class DatabaseMonitoringController : ControllerBase
                 }
             };
 
-            return Ok(trends);
+            return Task.FromResult<IActionResult>(Ok(trends));
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error retrieving monitoring trends");
-            return StatusCode(500, new { message = "An error occurred while retrieving trends data" });
+            return Task.FromResult<IActionResult>(StatusCode(500, new { message = "An error occurred while retrieving trends data" }));
         }
     }
 }

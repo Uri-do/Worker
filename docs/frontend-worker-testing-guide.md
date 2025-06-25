@@ -1,5 +1,30 @@
 # Frontend Development Guide: Worker Service Testing Page
 
+## 🚨 **IMPORTANT: API Response Format Changes**
+
+**All API responses are now wrapped in a standardized format. See `FRONTEND_API_CHANGES_SECOND_ROUND.md` for complete migration guide.**
+
+### **New Response Format**
+```javascript
+{
+  "success": boolean,
+  "data": T,                    // Your actual data
+  "message": string,
+  "errors": string[],
+  "metadata": {
+    "processingTimeMs": number,
+    "totalCount": number,       // For paginated responses
+    "pageNumber": number,
+    "pageSize": number,
+    "totalPages": number,
+    "hasNextPage": boolean,
+    "hasPreviousPage": boolean,
+    "version": string
+  },
+  "timestamp": string
+}
+```
+
 ## Overview
 
 This guide provides frontend developers with everything needed to create a comprehensive testing page for the MonitoringWorker service. The page will allow users to manage the worker lifecycle, monitor endpoints, and view real-time status updates.

@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using MonitoringWorker.Models;
 using MonitoringWorker.Services;
 using Quartz;
+using Quartz.Impl.Matchers;
 
 namespace MonitoringWorker.Controllers;
 
@@ -345,7 +346,7 @@ public class WorkerController : ControllerBase
     /// <returns>Worker metrics data</returns>
     [HttpGet("metrics")]
     [Authorize(Policy = "ViewMetrics")]
-    public async Task<ActionResult<object>> GetWorkerMetrics(
+    public Task<ActionResult<object>> GetWorkerMetrics(
         [FromQuery] string? metricType = null,
         [FromQuery] DateTime? fromDate = null,
         [FromQuery] DateTime? toDate = null)
@@ -373,12 +374,12 @@ public class WorkerController : ControllerBase
                 }
             };
 
-            return Ok(result);
+            return Task.FromResult<ActionResult<object>>(Ok(result));
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error getting worker metrics");
-            return StatusCode(500, new { error = "Failed to get worker metrics", details = ex.Message });
+            return Task.FromResult<ActionResult<object>>(StatusCode(500, new { error = "Failed to get worker metrics", details = ex.Message }));
         }
     }
 

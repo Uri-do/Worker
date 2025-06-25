@@ -1,6 +1,6 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using System.ComponentModel.DataAnnotations;
+using MonitoringWorker.Models;
 
 namespace MonitoringWorker.Controllers;
 
@@ -28,7 +28,7 @@ public class DatabaseConfigurationController : ControllerBase
     [ProducesResponseType(typeof(IEnumerable<DatabaseConnectionDto>), 200)]
     [ProducesResponseType(401)]
     [ProducesResponseType(403)]
-    public async Task<IActionResult> GetDatabaseConnections()
+    public IActionResult GetDatabaseConnections()
     {
         try
         {
@@ -83,7 +83,7 @@ public class DatabaseConfigurationController : ControllerBase
     [ProducesResponseType(404)]
     [ProducesResponseType(401)]
     [ProducesResponseType(403)]
-    public async Task<IActionResult> GetDatabaseConnection([FromRoute] Guid connectionId)
+    public IActionResult GetDatabaseConnection([FromRoute] Guid connectionId)
     {
         try
         {
@@ -122,7 +122,7 @@ public class DatabaseConfigurationController : ControllerBase
     [ProducesResponseType(400)]
     [ProducesResponseType(401)]
     [ProducesResponseType(403)]
-    public async Task<IActionResult> CreateDatabaseConnection([FromBody] CreateDatabaseConnectionRequest request)
+    public IActionResult CreateDatabaseConnection([FromBody] CreateDatabaseConnectionRequest request)
     {
         if (!ModelState.IsValid)
         {
@@ -172,8 +172,8 @@ public class DatabaseConfigurationController : ControllerBase
     [ProducesResponseType(404)]
     [ProducesResponseType(401)]
     [ProducesResponseType(403)]
-    public async Task<IActionResult> UpdateDatabaseConnection(
-        [FromRoute] Guid connectionId, 
+    public IActionResult UpdateDatabaseConnection(
+        [FromRoute] Guid connectionId,
         [FromBody] UpdateDatabaseConnectionRequest request)
     {
         if (!ModelState.IsValid)
@@ -221,7 +221,7 @@ public class DatabaseConfigurationController : ControllerBase
     [ProducesResponseType(404)]
     [ProducesResponseType(401)]
     [ProducesResponseType(403)]
-    public async Task<IActionResult> DeleteDatabaseConnection([FromRoute] Guid connectionId)
+    public IActionResult DeleteDatabaseConnection([FromRoute] Guid connectionId)
     {
         try
         {
@@ -249,7 +249,7 @@ public class DatabaseConfigurationController : ControllerBase
     [ProducesResponseType(404)]
     [ProducesResponseType(401)]
     [ProducesResponseType(403)]
-    public async Task<IActionResult> TestDatabaseConnection([FromRoute] Guid connectionId)
+    public IActionResult TestDatabaseConnection([FromRoute] Guid connectionId)
     {
         try
         {
@@ -273,78 +273,4 @@ public class DatabaseConfigurationController : ControllerBase
             return StatusCode(500, new { message = "An error occurred while testing the database connection" });
         }
     }
-}
-
-/// <summary>
-/// Database connection DTO (excludes sensitive connection string)
-/// </summary>
-public class DatabaseConnectionDto
-{
-    public Guid ConnectionId { get; set; }
-    public string ConnectionName { get; set; } = string.Empty;
-    public string Provider { get; set; } = string.Empty;
-    public string Environment { get; set; } = string.Empty;
-    public List<string> Tags { get; set; } = new();
-    public int ConnectionTimeoutSeconds { get; set; }
-    public int CommandTimeoutSeconds { get; set; }
-    public bool IsEnabled { get; set; }
-    public DateTime CreatedDate { get; set; }
-    public DateTime ModifiedDate { get; set; }
-}
-
-/// <summary>
-/// Create database connection request
-/// </summary>
-public class CreateDatabaseConnectionRequest
-{
-    [Required(ErrorMessage = "Connection name is required")]
-    [StringLength(100, ErrorMessage = "Connection name must not exceed 100 characters")]
-    public string ConnectionName { get; set; } = string.Empty;
-
-    [Required(ErrorMessage = "Provider is required")]
-    public string Provider { get; set; } = string.Empty;
-
-    [Required(ErrorMessage = "Connection string is required")]
-    public string ConnectionString { get; set; } = string.Empty;
-
-    [Required(ErrorMessage = "Environment is required")]
-    public string Environment { get; set; } = string.Empty;
-
-    public List<string>? Tags { get; set; }
-
-    [Range(1, 300, ErrorMessage = "Connection timeout must be between 1 and 300 seconds")]
-    public int ConnectionTimeoutSeconds { get; set; } = 30;
-
-    [Range(1, 300, ErrorMessage = "Command timeout must be between 1 and 300 seconds")]
-    public int CommandTimeoutSeconds { get; set; } = 30;
-
-    public bool IsEnabled { get; set; } = true;
-}
-
-/// <summary>
-/// Update database connection request
-/// </summary>
-public class UpdateDatabaseConnectionRequest
-{
-    [Required(ErrorMessage = "Connection name is required")]
-    [StringLength(100, ErrorMessage = "Connection name must not exceed 100 characters")]
-    public string ConnectionName { get; set; } = string.Empty;
-
-    [Required(ErrorMessage = "Provider is required")]
-    public string Provider { get; set; } = string.Empty;
-
-    public string? ConnectionString { get; set; } // Optional for updates
-
-    [Required(ErrorMessage = "Environment is required")]
-    public string Environment { get; set; } = string.Empty;
-
-    public List<string>? Tags { get; set; }
-
-    [Range(1, 300, ErrorMessage = "Connection timeout must be between 1 and 300 seconds")]
-    public int ConnectionTimeoutSeconds { get; set; } = 30;
-
-    [Range(1, 300, ErrorMessage = "Command timeout must be between 1 and 300 seconds")]
-    public int CommandTimeoutSeconds { get; set; } = 30;
-
-    public bool IsEnabled { get; set; } = true;
 }

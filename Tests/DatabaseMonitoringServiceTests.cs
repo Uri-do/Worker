@@ -1,4 +1,5 @@
 using FluentAssertions;
+using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using MonitoringWorker.Configuration;
@@ -12,12 +13,14 @@ namespace MonitoringWorker.Tests;
 public class DatabaseMonitoringServiceTests
 {
     private readonly Mock<ILogger<DatabaseMonitoringService>> _mockLogger;
+    private readonly Mock<IMemoryCache> _mockCache;
     private readonly DatabaseMonitoringOptions _dbOptions;
     private readonly DatabaseMonitoringService _dbService;
 
     public DatabaseMonitoringServiceTests()
     {
         _mockLogger = new Mock<ILogger<DatabaseMonitoringService>>();
+        _mockCache = new Mock<IMemoryCache>();
         
         _dbOptions = new DatabaseMonitoringOptions
         {
@@ -74,7 +77,7 @@ public class DatabaseMonitoringServiceTests
         var mockOptions = new Mock<IOptions<DatabaseMonitoringOptions>>();
         mockOptions.Setup(x => x.Value).Returns(_dbOptions);
 
-        _dbService = new DatabaseMonitoringService(_mockLogger.Object, mockOptions.Object);
+        _dbService = new DatabaseMonitoringService(_mockLogger.Object, mockOptions.Object, _mockCache.Object);
     }
 
     [Fact]
