@@ -1,0 +1,636 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MonitoringWorker - Testing Dashboard</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        .status-badge {
+            padding: 0.25rem 0.5rem;
+            border-radius: 0.375rem;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+        .status-running { background-color: #d1f2eb; color: #0f5132; }
+        .status-stopped { background-color: #f8d7da; color: #721c24; }
+        .status-error { background-color: #fff3cd; color: #856404; }
+        .status-healthy { background-color: #d1f2eb; color: #0f5132; }
+        .status-unhealthy { background-color: #f8d7da; color: #721c24; }
+        
+        .metric-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 10px;
+            padding: 1.5rem;
+            margin-bottom: 1rem;
+        }
+        
+        .endpoint-card {
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            padding: 1rem;
+            margin-bottom: 1rem;
+            transition: all 0.3s ease;
+        }
+        
+        .endpoint-card:hover {
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            transform: translateY(-2px);
+        }
+        
+        .loading {
+            opacity: 0.6;
+            pointer-events: none;
+        }
+        
+        .pulse {
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.5; }
+            100% { opacity: 1; }
+        }
+        
+        .log-container {
+            background-color: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 4px;
+            padding: 1rem;
+            max-height: 300px;
+            overflow-y: auto;
+            font-family: 'Courier New', monospace;
+            font-size: 0.875rem;
+        }
+        
+        .log-entry {
+            margin-bottom: 0.5rem;
+            padding: 0.25rem;
+            border-radius: 3px;
+        }
+        
+        .log-info { background-color: #e7f3ff; }
+        .log-success { background-color: #d4edda; }
+        .log-warning { background-color: #fff3cd; }
+        .log-error { background-color: #f8d7da; }
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container">
+            <a class="navbar-brand" href="#">
+                <i class="fas fa-heartbeat"></i> MonitoringWorker
+            </a>
+            <div class="navbar-nav ms-auto">
+                <span class="navbar-text me-3" id="user-info">Not logged in</span>
+                <button class="btn btn-outline-light btn-sm" id="logout-btn" style="display: none;">Logout</button>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mt-4">
+        <!-- Login Section -->
+        <div id="login-section" class="row justify-content-center">
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0">Login to MonitoringWorker</h5>
+                    </div>
+                    <div class="card-body">
+                        <form id="login-form">
+                            <div class="mb-3">
+                                <label for="username" class="form-label">Username</label>
+                                <input type="text" class="form-control" id="username" value="admin" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="password" class="form-label">Password</label>
+                                <input type="password" class="form-control" id="password" value="admin123" required>
+                            </div>
+                            <button type="submit" class="btn btn-primary w-100">Login</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Dashboard -->
+        <div id="dashboard-section" style="display: none;">
+            <!-- Worker Status Overview -->
+            <div class="row mb-4">
+                <div class="col-12">
+                    <div class="card">
+                        <div class="card-header d-flex justify-content-between align-items-center">
+                            <h5 class="mb-0">
+                                <i class="fas fa-cogs"></i> Worker Status
+                            </h5>
+                            <button class="btn btn-sm btn-outline-secondary" id="refresh-status">
+                                <i class="fas fa-sync-alt"></i> Refresh
+                            </button>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-3">
+                                    <div class="metric-card text-center">
+                                        <h6>Status</h6>
+                                        <h3 id="worker-status">
+                                            <span class="status-badge status-stopped">Stopped</span>
+                                        </h3>
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="metric-card text-center">
+                                        <h6>Uptime</h6>
+                                        <h3 id="worker-uptime">--:--:--</h3>
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="metric-card text-center">
+                                        <h6>Success Rate</h6>
+                                        <h3 id="success-rate">--%</h3>
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="metric-card text-center">
+                                        <h6>Total Checks</h6>
+                                        <h3 id="total-checks">--</h3>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Worker Controls -->
+            <div class="row mb-4">
+                <div class="col-12">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5 class="mb-0">
+                                <i class="fas fa-play-circle"></i> Worker Controls
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="btn-group me-2" role="group">
+                                <button type="button" class="btn btn-success" id="start-worker">
+                                    <i class="fas fa-play"></i> Start Worker
+                                </button>
+                                <button type="button" class="btn btn-danger" id="stop-worker">
+                                    <i class="fas fa-stop"></i> Stop Worker
+                                </button>
+                                <button type="button" class="btn btn-warning" id="restart-worker">
+                                    <i class="fas fa-redo"></i> Restart Worker
+                                </button>
+                            </div>
+                            <button type="button" class="btn btn-info" id="manual-check">
+                                <i class="fas fa-check-circle"></i> Run Manual Check
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Jobs Management -->
+            <div class="row mb-4">
+                <div class="col-12">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5 class="mb-0">
+                                <i class="fas fa-tasks"></i> Scheduled Jobs
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <div id="jobs-container">
+                                <p class="text-muted">No jobs found. Start the worker to see scheduled jobs.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Monitoring Endpoints -->
+            <div class="row mb-4">
+                <div class="col-12">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5 class="mb-0">
+                                <i class="fas fa-globe"></i> Monitoring Endpoints
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <div id="endpoints-container" class="row">
+                                <div class="col-md-6">
+                                    <div class="endpoint-card">
+                                        <h6>LocalTest</h6>
+                                        <span class="status-badge status-healthy">Healthy</span>
+                                        <p class="mb-1"><small>URL: http://localhost:5000/healthz/live</small></p>
+                                        <p class="mb-0"><small>Last Check: --</small></p>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="endpoint-card">
+                                        <h6>ExternalAPI</h6>
+                                        <span class="status-badge status-healthy">Healthy</span>
+                                        <p class="mb-1"><small>URL: https://httpbin.org/status/200</small></p>
+                                        <p class="mb-0"><small>Last Check: --</small></p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Real-time Logs -->
+            <div class="row">
+                <div class="col-12">
+                    <div class="card">
+                        <div class="card-header d-flex justify-content-between align-items-center">
+                            <h5 class="mb-0">
+                                <i class="fas fa-terminal"></i> Real-time Events
+                            </h5>
+                            <button class="btn btn-sm btn-outline-secondary" id="clear-logs">
+                                <i class="fas fa-trash"></i> Clear
+                            </button>
+                        </div>
+                        <div class="card-body">
+                            <div id="logs-container" class="log-container">
+                                <div class="log-entry log-info">
+                                    <strong>[INFO]</strong> Dashboard initialized. Waiting for connection...
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Alert Container -->
+        <div id="alert-container" class="position-fixed top-0 end-0 p-3" style="z-index: 1050;"></div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/7.0.0/signalr.min.js"></script>
+    <script>
+        // Configuration
+        const API_BASE_URL = 'http://localhost:5002';
+        
+        // Global variables
+        let authToken = localStorage.getItem('jwt-token');
+        let signalRConnection = null;
+        let statusRefreshInterval = null;
+
+        // Utility functions
+        function showAlert(message, type = 'info', duration = 5000) {
+            const alertId = 'alert-' + Date.now();
+            const alertHtml = `
+                <div id="${alertId}" class="alert alert-${type} alert-dismissible fade show" role="alert">
+                    ${message}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            `;
+            document.getElementById('alert-container').insertAdjacentHTML('beforeend', alertHtml);
+            
+            if (duration > 0) {
+                setTimeout(() => {
+                    const alertElement = document.getElementById(alertId);
+                    if (alertElement) {
+                        alertElement.remove();
+                    }
+                }, duration);
+            }
+        }
+
+        function addLogEntry(message, type = 'info') {
+            const timestamp = new Date().toLocaleTimeString();
+            const logEntry = document.createElement('div');
+            logEntry.className = `log-entry log-${type}`;
+            logEntry.innerHTML = `<strong>[${timestamp}]</strong> ${message}`;
+            
+            const container = document.getElementById('logs-container');
+            container.appendChild(logEntry);
+            container.scrollTop = container.scrollHeight;
+        }
+
+        function formatUptime(uptimeString) {
+            if (!uptimeString) return '--:--:--';
+            
+            // Parse uptime string (format: "HH:MM:SS" or "DD.HH:MM:SS")
+            const parts = uptimeString.split(':');
+            if (parts.length === 3) {
+                return uptimeString;
+            }
+            return '--:--:--';
+        }
+
+        // API functions
+        async function apiCall(endpoint, options = {}) {
+            const url = `${API_BASE_URL}${endpoint}`;
+            const defaultOptions = {
+                headers: {
+                    'Content-Type': 'application/json',
+                    ...(authToken && { 'Authorization': `Bearer ${authToken}` })
+                }
+            };
+            
+            const response = await fetch(url, { ...defaultOptions, ...options });
+            
+            if (response.status === 401) {
+                logout();
+                throw new Error('Authentication required');
+            }
+            
+            if (!response.ok) {
+                const errorText = await response.text();
+                throw new Error(`HTTP ${response.status}: ${errorText}`);
+            }
+            
+            return await response.json();
+        }
+
+        // Authentication
+        async function login(username, password) {
+            try {
+                const response = await apiCall('/api/auth/login', {
+                    method: 'POST',
+                    body: JSON.stringify({ username, password })
+                });
+                
+                authToken = response.token;
+                localStorage.setItem('jwt-token', authToken);
+                
+                document.getElementById('user-info').textContent = `Welcome, ${response.user.username}`;
+                document.getElementById('logout-btn').style.display = 'block';
+                document.getElementById('login-section').style.display = 'none';
+                document.getElementById('dashboard-section').style.display = 'block';
+                
+                showAlert('Login successful!', 'success');
+                addLogEntry('User logged in successfully', 'success');
+                
+                await initializeDashboard();
+            } catch (error) {
+                showAlert(`Login failed: ${error.message}`, 'danger');
+                addLogEntry(`Login failed: ${error.message}`, 'error');
+            }
+        }
+
+        function logout() {
+            authToken = null;
+            localStorage.removeItem('jwt-token');
+            
+            if (signalRConnection) {
+                signalRConnection.stop();
+            }
+            
+            if (statusRefreshInterval) {
+                clearInterval(statusRefreshInterval);
+            }
+            
+            document.getElementById('login-section').style.display = 'block';
+            document.getElementById('dashboard-section').style.display = 'none';
+            document.getElementById('user-info').textContent = 'Not logged in';
+            document.getElementById('logout-btn').style.display = 'none';
+            
+            addLogEntry('User logged out', 'info');
+        }
+
+        // Worker management
+        async function getWorkerStatus() {
+            try {
+                const status = await apiCall('/api/worker/status');
+                updateStatusDisplay(status);
+                return status;
+            } catch (error) {
+                showAlert(`Failed to get worker status: ${error.message}`, 'danger');
+                addLogEntry(`Failed to get worker status: ${error.message}`, 'error');
+            }
+        }
+
+        function updateStatusDisplay(status) {
+            // Update status badge
+            const statusElement = document.getElementById('worker-status');
+            const statusClass = status.isRunning ? 'status-running' : 'status-stopped';
+            const statusText = status.isRunning ? 'Running' : 'Stopped';
+            statusElement.innerHTML = `<span class="status-badge ${statusClass}">${statusText}</span>`;
+            
+            // Update metrics
+            document.getElementById('worker-uptime').textContent = formatUptime(status.metrics?.uptime);
+            document.getElementById('success-rate').textContent = `${status.metrics?.successRate || 0}%`;
+            document.getElementById('total-checks').textContent = status.metrics?.totalChecks || 0;
+            
+            // Update jobs
+            updateJobsDisplay(status.jobs || []);
+            
+            // Update button states
+            document.getElementById('start-worker').disabled = status.isRunning;
+            document.getElementById('stop-worker').disabled = !status.isRunning;
+            document.getElementById('restart-worker').disabled = false;
+        }
+
+        function updateJobsDisplay(jobs) {
+            const container = document.getElementById('jobs-container');
+            
+            if (jobs.length === 0) {
+                container.innerHTML = '<p class="text-muted">No jobs found. Start the worker to see scheduled jobs.</p>';
+                return;
+            }
+            
+            container.innerHTML = jobs.map(job => `
+                <div class="d-flex justify-content-between align-items-center border-bottom py-2">
+                    <div>
+                        <strong>${job.jobName}</strong>
+                        <br>
+                        <small class="text-muted">
+                            State: ${job.state} | 
+                            Next: ${job.nextFireTime ? new Date(job.nextFireTime).toLocaleString() : 'N/A'}
+                        </small>
+                    </div>
+                    <div class="btn-group btn-group-sm">
+                        <button class="btn btn-outline-warning" onclick="pauseJob('${job.jobName}')" 
+                                ${job.state === 'Paused' ? 'disabled' : ''}>
+                            Pause
+                        </button>
+                        <button class="btn btn-outline-success" onclick="resumeJob('${job.jobName}')"
+                                ${job.state !== 'Paused' ? 'disabled' : ''}>
+                            Resume
+                        </button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        async function startWorker() {
+            try {
+                const result = await apiCall('/api/worker/start', { method: 'POST' });
+                if (result.success) {
+                    showAlert(result.message, 'success');
+                    addLogEntry('Worker started successfully', 'success');
+                    await getWorkerStatus();
+                } else {
+                    showAlert(result.message, 'warning');
+                }
+            } catch (error) {
+                showAlert(`Failed to start worker: ${error.message}`, 'danger');
+                addLogEntry(`Failed to start worker: ${error.message}`, 'error');
+            }
+        }
+
+        async function stopWorker() {
+            if (!confirm('Are you sure you want to stop the worker?')) return;
+            
+            try {
+                const result = await apiCall('/api/worker/stop', { method: 'POST' });
+                if (result.success) {
+                    showAlert(result.message, 'success');
+                    addLogEntry('Worker stopped successfully', 'success');
+                    await getWorkerStatus();
+                } else {
+                    showAlert(result.message, 'warning');
+                }
+            } catch (error) {
+                showAlert(`Failed to stop worker: ${error.message}`, 'danger');
+                addLogEntry(`Failed to stop worker: ${error.message}`, 'error');
+            }
+        }
+
+        async function restartWorker() {
+            try {
+                const result = await apiCall('/api/worker/restart', { method: 'POST' });
+                if (result.success) {
+                    showAlert(result.message, 'success');
+                    addLogEntry('Worker restarted successfully', 'success');
+                    await getWorkerStatus();
+                } else {
+                    showAlert(result.message, 'warning');
+                }
+            } catch (error) {
+                showAlert(`Failed to restart worker: ${error.message}`, 'danger');
+                addLogEntry(`Failed to restart worker: ${error.message}`, 'error');
+            }
+        }
+
+        async function pauseJob(jobName) {
+            try {
+                const result = await apiCall(`/api/worker/jobs/${jobName}/pause`, { method: 'POST' });
+                if (result.success) {
+                    showAlert(result.message, 'success');
+                    addLogEntry(`Job '${jobName}' paused`, 'info');
+                    await getWorkerStatus();
+                } else {
+                    showAlert(result.message, 'warning');
+                }
+            } catch (error) {
+                showAlert(`Failed to pause job: ${error.message}`, 'danger');
+                addLogEntry(`Failed to pause job '${jobName}': ${error.message}`, 'error');
+            }
+        }
+
+        async function resumeJob(jobName) {
+            try {
+                const result = await apiCall(`/api/worker/jobs/${jobName}/resume`, { method: 'POST' });
+                if (result.success) {
+                    showAlert(result.message, 'success');
+                    addLogEntry(`Job '${jobName}' resumed`, 'info');
+                    await getWorkerStatus();
+                } else {
+                    showAlert(result.message, 'warning');
+                }
+            } catch (error) {
+                showAlert(`Failed to resume job: ${error.message}`, 'danger');
+                addLogEntry(`Failed to resume job '${jobName}': ${error.message}`, 'error');
+            }
+        }
+
+        async function runManualCheck() {
+            try {
+                const result = await apiCall('/api/monitoring/check', { method: 'POST' });
+                showAlert('Manual check initiated', 'info');
+                addLogEntry('Manual monitoring check initiated', 'info');
+            } catch (error) {
+                showAlert(`Failed to run manual check: ${error.message}`, 'danger');
+                addLogEntry(`Failed to run manual check: ${error.message}`, 'error');
+            }
+        }
+
+        // SignalR connection
+        async function initializeSignalR() {
+            if (!authToken) return;
+            
+            try {
+                signalRConnection = new signalR.HubConnectionBuilder()
+                    .withUrl(`${API_BASE_URL}/monitoringHub`, {
+                        accessTokenFactory: () => authToken
+                    })
+                    .build();
+                
+                // Event handlers
+                signalRConnection.on("WorkerStarted", (event) => {
+                    addLogEntry('Worker started via SignalR', 'success');
+                    getWorkerStatus();
+                });
+                
+                signalRConnection.on("WorkerStopped", (event) => {
+                    addLogEntry('Worker stopped via SignalR', 'warning');
+                    getWorkerStatus();
+                });
+                
+                signalRConnection.on("MonitoringResult", (result) => {
+                    addLogEntry(`Monitoring result: ${result.checkName} - ${result.status}`, 'info');
+                });
+                
+                await signalRConnection.start();
+                addLogEntry('SignalR connection established', 'success');
+            } catch (error) {
+                addLogEntry(`SignalR connection failed: ${error.message}`, 'error');
+            }
+        }
+
+        // Dashboard initialization
+        async function initializeDashboard() {
+            await getWorkerStatus();
+            await initializeSignalR();
+            
+            // Set up auto-refresh
+            statusRefreshInterval = setInterval(getWorkerStatus, 30000);
+        }
+
+        // Event listeners
+        document.addEventListener('DOMContentLoaded', function() {
+            // Login form
+            document.getElementById('login-form').addEventListener('submit', async function(e) {
+                e.preventDefault();
+                const username = document.getElementById('username').value;
+                const password = document.getElementById('password').value;
+                await login(username, password);
+            });
+            
+            // Worker controls
+            document.getElementById('start-worker').addEventListener('click', startWorker);
+            document.getElementById('stop-worker').addEventListener('click', stopWorker);
+            document.getElementById('restart-worker').addEventListener('click', restartWorker);
+            document.getElementById('manual-check').addEventListener('click', runManualCheck);
+            document.getElementById('refresh-status').addEventListener('click', getWorkerStatus);
+            
+            // Other controls
+            document.getElementById('logout-btn').addEventListener('click', logout);
+            document.getElementById('clear-logs').addEventListener('click', function() {
+                document.getElementById('logs-container').innerHTML = '';
+                addLogEntry('Logs cleared', 'info');
+            });
+            
+            // Check if already logged in
+            if (authToken) {
+                document.getElementById('login-section').style.display = 'none';
+                document.getElementById('dashboard-section').style.display = 'block';
+                document.getElementById('logout-btn').style.display = 'block';
+                initializeDashboard();
+            }
+        });
+    </script>
+</body>
+</html>

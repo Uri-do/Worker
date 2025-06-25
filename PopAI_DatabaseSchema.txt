@@ -1,0 +1,727 @@
+﻿PopAI Database Schema Analysis
+Generated: 06/25/2025 16:13:34
+==================================================
+
+TABLE: auth.Permissions
+Created: 06/06/2025 01:38:44
+Modified: 06/06/2025 01:38:44
+------------------------------
+  PermissionId nvarchar(50)(,) NOT NULL [PK]
+    DEFAULT: 
+  Name nvarchar(100)(,) NOT NULL
+    DEFAULT: 
+  Description nvarchar(500)(,) NOT NULL
+    DEFAULT: ('')
+  Resource nvarchar(100)(,) NOT NULL
+    DEFAULT: 
+  Action nvarchar(50)(,) NOT NULL
+    DEFAULT: 
+  IsSystemPermission bit()(,) NOT NULL
+    DEFAULT: ((0))
+  IsActive bit()(,) NOT NULL
+    DEFAULT: ((1))
+  CreatedDate datetime2()(,) NOT NULL
+    DEFAULT: (sysutcdatetime())
+  ModifiedDate datetime2()(,) NOT NULL
+    DEFAULT: (sysutcdatetime())
+
+TABLE: auth.RefreshTokens
+Created: 06/06/2025 01:38:44
+Modified: 06/06/2025 01:38:44
+------------------------------
+  Id int() NOT NULL [PK]
+    DEFAULT: 
+  UserId nvarchar(50)(,) NOT NULL
+    DEFAULT: 
+  Token nvarchar(255)(,) NOT NULL
+    DEFAULT: 
+  ExpiresAt datetime2()(,) NOT NULL
+    DEFAULT: 
+  CreatedAt datetime2()(,) NOT NULL
+    DEFAULT: (sysutcdatetime())
+  IsActive bit()(,) NOT NULL
+    DEFAULT: ((1))
+  RevokedAt datetime2()(,) NULL
+    DEFAULT: 
+  RevokedBy nvarchar(100)(,) NULL
+    DEFAULT: 
+  RevokedReason nvarchar(500)(,) NULL
+    DEFAULT: 
+  IpAddress nvarchar(45)(,) NULL
+    DEFAULT: 
+  UserAgent nvarchar(500)(,) NULL
+    DEFAULT: 
+
+TABLE: auth.RolePermissions
+Created: 06/06/2025 01:38:44
+Modified: 06/06/2025 01:38:44
+------------------------------
+  RoleId nvarchar(50)(,) NOT NULL [PK]
+    DEFAULT: 
+  PermissionId nvarchar(50)(,) NOT NULL [PK]
+    DEFAULT: 
+  AssignedDate datetime2()(,) NOT NULL
+    DEFAULT: (sysutcdatetime())
+  AssignedBy nvarchar(100)(,) NULL
+    DEFAULT: 
+
+TABLE: auth.Roles
+Created: 06/06/2025 01:38:44
+Modified: 06/06/2025 01:38:44
+------------------------------
+  RoleId nvarchar(50)(,) NOT NULL [PK]
+    DEFAULT: 
+  Name nvarchar(100)(,) NOT NULL
+    DEFAULT: 
+  Description nvarchar(500)(,) NOT NULL
+    DEFAULT: ('')
+  IsSystemRole bit()(,) NOT NULL
+    DEFAULT: ((0))
+  IsActive bit()(,) NOT NULL
+    DEFAULT: ((1))
+  CreatedDate datetime2()(,) NOT NULL
+    DEFAULT: (sysutcdatetime())
+  ModifiedDate datetime2()(,) NOT NULL
+    DEFAULT: (sysutcdatetime())
+  CreatedBy nvarchar(100)(,) NULL
+    DEFAULT: 
+  ModifiedBy nvarchar(100)(,) NULL
+    DEFAULT: 
+
+TABLE: auth.SecurityThreats
+Created: 06/10/2025 01:18:59
+Modified: 06/10/2025 01:18:59
+------------------------------
+  ThreatId nvarchar(50)(,) NOT NULL [PK]
+    DEFAULT: 
+  ThreatType nvarchar(100)(,) NOT NULL
+    DEFAULT: 
+  Severity nvarchar(50)(,) NOT NULL
+    DEFAULT: 
+  Description nvarchar(1000)(,) NOT NULL
+    DEFAULT: 
+  UserId nvarchar(50)(,) NULL
+    DEFAULT: 
+  IpAddress nvarchar(45)(,) NULL
+    DEFAULT: 
+  DetectedAt datetime2()(,) NOT NULL
+    DEFAULT: 
+  IsResolved bit()(,) NOT NULL
+    DEFAULT: 
+  ResolvedAt datetime2()(,) NULL
+    DEFAULT: 
+  Resolution nvarchar(1000)(,) NULL
+    DEFAULT: 
+  ThreatData nvarchar(-1)(,) NOT NULL
+    DEFAULT: 
+
+TABLE: auth.UserPasswords
+Created: 06/06/2025 01:38:44
+Modified: 06/06/2025 01:38:44
+------------------------------
+  Id int() NOT NULL [PK]
+    DEFAULT: 
+  UserId nvarchar(50)(,) NOT NULL
+    DEFAULT: 
+  PasswordHash nvarchar(255)(,) NOT NULL
+    DEFAULT: 
+  PasswordSalt nvarchar(255)(,) NULL
+    DEFAULT: 
+  CreatedAt datetime2()(,) NOT NULL
+    DEFAULT: (sysutcdatetime())
+  IsActive bit()(,) NOT NULL
+    DEFAULT: ((1))
+  CreatedBy nvarchar(100)(,) NULL
+    DEFAULT: 
+
+TABLE: auth.UserRoles
+Created: 06/06/2025 01:38:44
+Modified: 06/06/2025 01:38:44
+------------------------------
+  UserId nvarchar(50)(,) NOT NULL [PK]
+    DEFAULT: 
+  RoleId nvarchar(50)(,) NOT NULL [PK]
+    DEFAULT: 
+  AssignedDate datetime2()(,) NOT NULL
+    DEFAULT: (sysutcdatetime())
+  AssignedBy nvarchar(100)(,) NULL
+    DEFAULT: 
+
+TABLE: auth.Users
+Created: 06/06/2025 01:38:44
+Modified: 06/06/2025 01:38:45
+------------------------------
+  UserId nvarchar(50)(,) NOT NULL [PK]
+    DEFAULT: 
+  Username nvarchar(100)(,) NOT NULL
+    DEFAULT: 
+  Email nvarchar(255)(,) NOT NULL
+    DEFAULT: 
+  DisplayName nvarchar(255)(,) NOT NULL
+    DEFAULT: 
+  FirstName nvarchar(100)(,) NULL
+    DEFAULT: 
+  LastName nvarchar(100)(,) NULL
+    DEFAULT: 
+  Department nvarchar(100)(,) NULL
+    DEFAULT: 
+  Title nvarchar(100)(,) NULL
+    DEFAULT: 
+  PasswordHash nvarchar(255)(,) NOT NULL
+    DEFAULT: 
+  PasswordSalt nvarchar(255)(,) NULL
+    DEFAULT: 
+  IsActive bit()(,) NOT NULL
+    DEFAULT: ((1))
+  EmailConfirmed bit()(,) NOT NULL
+    DEFAULT: ((0))
+  TwoFactorEnabled bit()(,) NOT NULL
+    DEFAULT: ((0))
+  FailedLoginAttempts int() NOT NULL
+    DEFAULT: ((0))
+  LockoutEnd datetime2()(,) NULL
+    DEFAULT: 
+  LastLogin datetime2()(,) NULL
+    DEFAULT: 
+  LastPasswordChange datetime2()(,) NULL
+    DEFAULT: 
+  CreatedDate datetime2()(,) NOT NULL
+    DEFAULT: (sysutcdatetime())
+  ModifiedDate datetime2()(,) NOT NULL
+    DEFAULT: (sysutcdatetime())
+  CreatedBy nvarchar(100)(,) NULL
+    DEFAULT: 
+  ModifiedBy nvarchar(100)(,) NULL
+    DEFAULT: 
+
+TABLE: auth.UserTwoFactorSettings
+Created: 06/10/2025 01:18:59
+Modified: 06/10/2025 01:18:59
+------------------------------
+  UserId nvarchar(50)(,) NOT NULL [PK]
+    DEFAULT: 
+  IsEnabled bit()(,) NOT NULL
+    DEFAULT: 
+  Secret nvarchar(255)(,) NULL
+    DEFAULT: 
+  RecoveryCodes nvarchar(-1)(,) NOT NULL
+    DEFAULT: 
+  EnabledAt datetime2()(,) NULL
+    DEFAULT: 
+
+TABLE: dbo.__EFMigrationsHistory
+Created: 06/05/2025 23:19:11
+Modified: 06/05/2025 23:19:11
+------------------------------
+  MigrationId nvarchar(150)(,) NOT NULL [PK]
+    DEFAULT: 
+  ProductVersion nvarchar(32)(,) NOT NULL
+    DEFAULT: 
+
+TABLE: dbo.SecurityAuditEvents
+Created: 06/07/2025 20:49:28
+Modified: 06/07/2025 20:49:35
+------------------------------
+  EventId nvarchar(50)(,) NOT NULL [PK]
+    DEFAULT: 
+  EventType nvarchar(100)(,) NOT NULL
+    DEFAULT: 
+  UserId nvarchar(50)(,) NULL
+    DEFAULT: 
+  Username nvarchar(100)(,) NULL
+    DEFAULT: 
+  IpAddress nvarchar(45)(,) NULL
+    DEFAULT: 
+  UserAgent nvarchar(500)(,) NULL
+    DEFAULT: 
+  Resource nvarchar(200)(,) NULL
+    DEFAULT: 
+  Action nvarchar(100)(,) NULL
+    DEFAULT: 
+  IsSuccess bit()(,) NOT NULL
+    DEFAULT: 
+  ErrorMessage nvarchar(1000)(,) NULL
+    DEFAULT: 
+  AdditionalData nvarchar(-1)(,) NULL
+    DEFAULT: 
+  Timestamp datetime2()(,) NOT NULL
+    DEFAULT: 
+  Severity nvarchar(50)(,) NOT NULL
+    DEFAULT: 
+
+TABLE: monitoring.AlertLogs
+Created: 06/05/2025 13:07:58
+Modified: 06/25/2025 13:42:55
+------------------------------
+  AlertId bigint() NOT NULL [PK]
+    DEFAULT: 
+  KpiId int() NOT NULL
+    DEFAULT: 
+  TriggerTime datetime2()(,) NOT NULL
+    DEFAULT: (sysutcdatetime())
+  Message nvarchar(500)(,) NOT NULL
+    DEFAULT: 
+  Details nvarchar(-1)(,) NULL
+    DEFAULT: 
+  SentVia tinyint() NOT NULL
+    DEFAULT: 
+  SentTo nvarchar(-1)(,) NOT NULL
+    DEFAULT: 
+  CurrentValue decimal()(18,2) NULL
+    DEFAULT: 
+  HistoricalValue decimal()(18,2) NULL
+    DEFAULT: 
+  DeviationPercent decimal()(5,2) NULL
+    DEFAULT: 
+  IsResolved bit()(,) NOT NULL
+    DEFAULT: ((0))
+  ResolvedTime datetime2()(,) NULL
+    DEFAULT: 
+  ResolvedBy nvarchar(100)(,) NULL
+    DEFAULT: 
+  Subject nvarchar(500)(,) NULL
+    DEFAULT: 
+  Description nvarchar(-1)(,) NULL
+    DEFAULT: 
+  ResolutionNotes nvarchar(1000)(,) NULL
+    DEFAULT: 
+  IndicatorID bigint() NULL
+    DEFAULT: 
+
+TABLE: monitoring.Config
+Created: 06/05/2025 13:07:58
+Modified: 06/08/2025 06:25:20
+------------------------------
+  ConfigKey nvarchar(50)(,) NOT NULL [PK]
+    DEFAULT: 
+  ConfigValue nvarchar(255)(,) NOT NULL
+    DEFAULT: 
+  Description nvarchar(500)(,) NULL
+    DEFAULT: 
+  ModifiedDate datetime2()(,) NOT NULL
+    DEFAULT: (sysutcdatetime())
+  Category nvarchar(50)(,) NULL
+    DEFAULT: 
+  CreatedDate datetime2()(,) NOT NULL
+    DEFAULT: (getutcdate())
+  IsEncrypted bit()(,) NOT NULL
+    DEFAULT: ((0))
+  IsReadOnly bit()(,) NOT NULL
+    DEFAULT: ((0))
+
+TABLE: monitoring.Contacts
+Created: 06/05/2025 13:07:58
+Modified: 06/25/2025 13:40:07
+------------------------------
+  ContactId int() NOT NULL [PK]
+    DEFAULT: 
+  Name nvarchar(255)(,) NOT NULL
+    DEFAULT: 
+  Email nvarchar(255)(,) NULL
+    DEFAULT: 
+  Phone nvarchar(50)(,) NULL
+    DEFAULT: 
+  IsActive bit()(,) NOT NULL
+    DEFAULT: ((1))
+  CreatedDate datetime2()(,) NOT NULL
+    DEFAULT: (sysutcdatetime())
+  ModifiedDate datetime2()(,) NOT NULL
+    DEFAULT: (sysutcdatetime())
+
+TABLE: monitoring.DatabaseConnections
+Created: 06/25/2025 14:13:12
+Modified: 06/25/2025 14:13:12
+------------------------------
+  ConnectionId uniqueidentifier()(,) NOT NULL [PK]
+    DEFAULT: (newid())
+  ConnectionName nvarchar(100)(,) NOT NULL
+    DEFAULT: 
+  Provider nvarchar(50)(,) NOT NULL
+    DEFAULT: ('SqlServer')
+  ConnectionString nvarchar(1000)(,) NOT NULL
+    DEFAULT: 
+  Environment nvarchar(50)(,) NOT NULL
+    DEFAULT: 
+  Tags nvarchar(500)(,) NULL
+    DEFAULT: 
+  ConnectionTimeoutSeconds int() NOT NULL
+    DEFAULT: ((30))
+  CommandTimeoutSeconds int() NOT NULL
+    DEFAULT: ((30))
+  IsEnabled bit()(,) NOT NULL
+    DEFAULT: ((1))
+  IsEncrypted bit()(,) NOT NULL
+    DEFAULT: ((1))
+  CreatedBy nvarchar(100)(,) NOT NULL
+    DEFAULT: (suser_sname())
+  CreatedDate datetime2()(,) NOT NULL
+    DEFAULT: (sysutcdatetime())
+  ModifiedBy nvarchar(100)(,) NOT NULL
+    DEFAULT: (suser_sname())
+  ModifiedDate datetime2()(,) NOT NULL
+    DEFAULT: (sysutcdatetime())
+
+TABLE: monitoring.DatabaseMonitoringResults
+Created: 06/25/2025 14:13:12
+Modified: 06/25/2025 14:13:12
+------------------------------
+  ResultId uniqueidentifier()(,) NOT NULL [PK]
+    DEFAULT: (newid())
+  JobId uniqueidentifier()(,) NOT NULL
+    DEFAULT: 
+  ConnectionId uniqueidentifier()(,) NOT NULL
+    DEFAULT: 
+  QueryId uniqueidentifier()(,) NULL
+    DEFAULT: 
+  ConnectionName nvarchar(100)(,) NOT NULL
+    DEFAULT: 
+  QueryName nvarchar(100)(,) NULL
+    DEFAULT: 
+  Status nvarchar(20)(,) NOT NULL
+    DEFAULT: 
+  Message nvarchar(1000)(,) NOT NULL
+    DEFAULT: 
+  ResultValue nvarchar(-1)(,) NULL
+    DEFAULT: 
+  DurationMs bigint() NOT NULL
+    DEFAULT: 
+  Provider nvarchar(50)(,) NOT NULL
+    DEFAULT: 
+  Environment nvarchar(50)(,) NOT NULL
+    DEFAULT: 
+  Tags nvarchar(500)(,) NULL
+    DEFAULT: 
+  ServerVersion nvarchar(100)(,) NULL
+    DEFAULT: 
+  DatabaseName nvarchar(100)(,) NULL
+    DEFAULT: 
+  Details nvarchar(-1)(,) NULL
+    DEFAULT: 
+  Timestamp datetime2()(,) NOT NULL
+    DEFAULT: (sysutcdatetime())
+
+TABLE: monitoring.DatabaseQueries
+Created: 06/25/2025 14:13:12
+Modified: 06/25/2025 14:13:12
+------------------------------
+  QueryId uniqueidentifier()(,) NOT NULL [PK]
+    DEFAULT: (newid())
+  QueryName nvarchar(100)(,) NOT NULL
+    DEFAULT: 
+  QueryType nvarchar(50)(,) NOT NULL
+    DEFAULT: ('HealthCheck')
+  SqlQuery nvarchar(-1)(,) NOT NULL
+    DEFAULT: 
+  ResultType nvarchar(20)(,) NOT NULL
+    DEFAULT: ('Scalar')
+  ExpectedValue nvarchar(100)(,) NULL
+    DEFAULT: 
+  ComparisonOperator nvarchar(10)(,) NULL
+    DEFAULT: ('eq')
+  WarningThreshold decimal()(18,4) NULL
+    DEFAULT: 
+  CriticalThreshold decimal()(18,4) NULL
+    DEFAULT: 
+  TimeoutSeconds int() NOT NULL
+    DEFAULT: ((30))
+  IsEnabled bit()(,) NOT NULL
+    DEFAULT: ((1))
+  Description nvarchar(500)(,) NULL
+    DEFAULT: 
+  CreatedBy nvarchar(100)(,) NOT NULL
+    DEFAULT: (suser_sname())
+  CreatedDate datetime2()(,) NOT NULL
+    DEFAULT: (sysutcdatetime())
+  ModifiedBy nvarchar(100)(,) NOT NULL
+    DEFAULT: (suser_sname())
+  ModifiedDate datetime2()(,) NOT NULL
+    DEFAULT: (sysutcdatetime())
+
+TABLE: monitoring.ExecutionHistory
+Created: 06/18/2025 01:21:45
+Modified: 06/18/2025 01:21:45
+------------------------------
+  ExecutionHistoryID bigint() NOT NULL [PK]
+    DEFAULT: 
+  IndicatorID bigint() NOT NULL
+    DEFAULT: 
+  ExecutedAt datetime2()(,) NOT NULL
+    DEFAULT: (getutcdate())
+  DurationMs bigint() NOT NULL
+    DEFAULT: 
+  Success bit()(,) NOT NULL
+    DEFAULT: 
+  Result nvarchar(4000)(,) NULL
+    DEFAULT: 
+  ErrorMessage nvarchar(4000)(,) NULL
+    DEFAULT: 
+  RecordCount int() NULL
+    DEFAULT: 
+  ExecutionContext nvarchar(100)(,) NULL
+    DEFAULT: 
+  ExecutedBy nvarchar(100)(,) NULL
+    DEFAULT: 
+  Metadata nvarchar(4000)(,) NULL
+    DEFAULT: 
+
+TABLE: monitoring.IndicatorContacts
+Created: 06/12/2025 10:52:27
+Modified: 06/12/2025 10:52:27
+------------------------------
+  IndicatorContactID int() NOT NULL [PK]
+    DEFAULT: 
+  IndicatorID bigint() NOT NULL
+    DEFAULT: 
+  ContactID int() NOT NULL
+    DEFAULT: 
+  CreatedDate datetime2()(,) NOT NULL
+    DEFAULT: (getutcdate())
+  CreatedBy nvarchar(100)(,) NULL
+    DEFAULT: 
+  IsActive bit()(,) NOT NULL
+    DEFAULT: ((1))
+
+TABLE: monitoring.Indicators
+Created: 06/11/2025 13:17:19
+Modified: 06/18/2025 01:21:45
+------------------------------
+  IndicatorID bigint() NOT NULL [PK]
+    DEFAULT: 
+  IndicatorName varchar(500)(,) NULL
+    DEFAULT: 
+  IndicatorCode varchar(500)(,) NULL
+    DEFAULT: 
+  IndicatorDesc nvarchar(500)(,) NULL
+    DEFAULT: 
+  CollectorID bigint() NOT NULL
+    DEFAULT: 
+  CollectorItemName varchar(50)(,) NULL
+    DEFAULT: 
+  IsActive bit()(,) NULL
+    DEFAULT: 
+  LastMinutes int() NULL
+    DEFAULT: 
+  Priority varchar(50)(,) NULL
+    DEFAULT: 
+  OwnerContactID int() NULL
+    DEFAULT: 
+  CreatedDate datetime()(,) NULL
+    DEFAULT: 
+  UpdatedDate datetime()(,) NULL
+    DEFAULT: 
+  LastRun datetime()(,) NULL
+    DEFAULT: 
+  LastRunResult nvarchar(-1)(,) NULL
+    DEFAULT: 
+  AverageLastDays int() NULL
+    DEFAULT: 
+  ExecutionContext nvarchar(50)(,) NULL
+    DEFAULT: 
+  ExecutionStartTime datetime2()(,) NULL
+    DEFAULT: 
+  IsCurrentlyRunning bit()(,) NOT NULL
+    DEFAULT: ((0))
+  ThresholdComparison nvarchar(10)(,) NOT NULL
+    DEFAULT: ('gt')
+  ThresholdField nvarchar(50)(,) NOT NULL
+    DEFAULT: ('Total')
+  ThresholdType nvarchar(50)(,) NOT NULL
+    DEFAULT: ('threshold_value')
+  ThresholdValue decimal()(18,2) NOT NULL
+    DEFAULT: ((0.00))
+  AverageHour int() NULL
+    DEFAULT: 
+  SchedulerID int() NULL
+    DEFAULT: 
+  ModifiedDate datetime2()(,) NOT NULL
+    DEFAULT: (sysutcdatetime())
+
+TABLE: monitoring.IndicatorsExecutionHistory
+Created: 06/11/2025 13:17:20
+Modified: 06/11/2025 13:17:20
+------------------------------
+  ExecutionID bigint() NOT NULL
+    DEFAULT: 
+  RunDate datetime()(,) NULL
+    DEFAULT: 
+  Hour tinyint() NULL
+    DEFAULT: 
+  IndicatorID bigint() NULL
+    DEFAULT: 
+  IndicatorCode varchar(500)(,) NULL
+    DEFAULT: 
+  Amount decimal()(18,2) NULL
+    DEFAULT: 
+  Average decimal()(18,2) NULL
+    DEFAULT: 
+  Deviation decimal()(18,2) NULL
+    DEFAULT: 
+  Result nvarchar(500)(,) NULL
+    DEFAULT: 
+  UpdatedDate datetime()(,) NULL
+    DEFAULT: 
+
+TABLE: monitoring.Schedulers
+Created: 06/13/2025 15:46:11
+Modified: 06/13/2025 15:46:12
+------------------------------
+  SchedulerID int() NOT NULL [PK]
+    DEFAULT: 
+  SchedulerName nvarchar(100)(,) NOT NULL
+    DEFAULT: 
+  SchedulerDescription nvarchar(500)(,) NULL
+    DEFAULT: 
+  ScheduleType nvarchar(20)(,) NOT NULL
+    DEFAULT: 
+  IntervalMinutes int() NULL
+    DEFAULT: 
+  CronExpression nvarchar(255)(,) NULL
+    DEFAULT: 
+  ExecutionDateTime datetime2()(,) NULL
+    DEFAULT: 
+  StartDate datetime2()(,) NULL
+    DEFAULT: 
+  EndDate datetime2()(,) NULL
+    DEFAULT: 
+  Timezone nvarchar(50)(,) NOT NULL
+    DEFAULT: ('UTC')
+  IsEnabled bit()(,) NOT NULL
+    DEFAULT: ((1))
+  CreatedDate datetime2()(,) NOT NULL
+    DEFAULT: (sysutcdatetime())
+  CreatedBy nvarchar(100)(,) NOT NULL
+    DEFAULT: ('system')
+  ModifiedDate datetime2()(,) NOT NULL
+    DEFAULT: (sysutcdatetime())
+  ModifiedBy nvarchar(100)(,) NOT NULL
+    DEFAULT: ('system')
+
+TABLE: monitoring.SystemStatus
+Created: 06/05/2025 13:07:58
+Modified: 06/05/2025 13:07:58
+------------------------------
+  StatusId int() NOT NULL [PK]
+    DEFAULT: 
+  ServiceName nvarchar(100)(,) NOT NULL
+    DEFAULT: 
+  LastHeartbeat datetime2()(,) NOT NULL
+    DEFAULT: (sysutcdatetime())
+  Status nvarchar(50)(,) NOT NULL
+    DEFAULT: 
+  ErrorMessage nvarchar(-1)(,) NULL
+    DEFAULT: 
+  ProcessedKpis int() NOT NULL
+    DEFAULT: ((0))
+  AlertsSent int() NOT NULL
+    DEFAULT: ((0))
+
+TABLE: monitoring.TestTable
+Created: 06/25/2025 14:11:56
+Modified: 06/25/2025 14:11:56
+------------------------------
+  Id int() NOT NULL [PK]
+    DEFAULT: 
+  Name nvarchar(100)(,) NOT NULL
+    DEFAULT: 
+  CreatedDate datetime2()(,) NOT NULL
+    DEFAULT: (sysutcdatetime())
+
+TABLE: monitoring.WorkerInstances
+Created: 06/25/2025 14:13:12
+Modified: 06/25/2025 14:13:12
+------------------------------
+  WorkerInstanceId uniqueidentifier()(,) NOT NULL [PK]
+    DEFAULT: (newid())
+  WorkerName nvarchar(100)(,) NOT NULL
+    DEFAULT: 
+  MachineName nvarchar(100)(,) NOT NULL
+    DEFAULT: 
+  ProcessId int() NOT NULL
+    DEFAULT: 
+  Version nvarchar(50)(,) NOT NULL
+    DEFAULT: 
+  Environment nvarchar(50)(,) NOT NULL
+    DEFAULT: ('Production')
+  Status nvarchar(20)(,) NOT NULL
+    DEFAULT: ('Starting')
+  StartedAt datetime2()(,) NOT NULL
+    DEFAULT: (sysutcdatetime())
+  StoppedAt datetime2()(,) NULL
+    DEFAULT: 
+  LastHeartbeat datetime2()(,) NOT NULL
+    DEFAULT: (sysutcdatetime())
+  Configuration nvarchar(-1)(,) NULL
+    DEFAULT: 
+  Tags nvarchar(500)(,) NULL
+    DEFAULT: 
+  CreatedBy nvarchar(100)(,) NOT NULL
+    DEFAULT: (suser_sname())
+  CreatedDate datetime2()(,) NOT NULL
+    DEFAULT: (sysutcdatetime())
+  ModifiedDate datetime2()(,) NOT NULL
+    DEFAULT: (sysutcdatetime())
+
+TABLE: monitoring.WorkerJobs
+Created: 06/25/2025 14:13:12
+Modified: 06/25/2025 14:13:12
+------------------------------
+  JobId uniqueidentifier()(,) NOT NULL [PK]
+    DEFAULT: (newid())
+  WorkerInstanceId uniqueidentifier()(,) NOT NULL
+    DEFAULT: 
+  JobType nvarchar(50)(,) NOT NULL
+    DEFAULT: 
+  JobName nvarchar(200)(,) NOT NULL
+    DEFAULT: 
+  Status nvarchar(20)(,) NOT NULL
+    DEFAULT: ('Queued')
+  Priority int() NOT NULL
+    DEFAULT: ((5))
+  ScheduledAt datetime2()(,) NOT NULL
+    DEFAULT: (sysutcdatetime())
+  StartedAt datetime2()(,) NULL
+    DEFAULT: 
+  CompletedAt datetime2()(,) NULL
+    DEFAULT: 
+  DurationMs bigint() NULL
+    DEFAULT: 
+  ResultStatus nvarchar(20)(,) NULL
+    DEFAULT: 
+  ResultMessage nvarchar(1000)(,) NULL
+    DEFAULT: 
+  ResultData nvarchar(-1)(,) NULL
+    DEFAULT: 
+  ErrorMessage nvarchar(-1)(,) NULL
+    DEFAULT: 
+  RetryCount int() NOT NULL
+    DEFAULT: ((0))
+  MaxRetries int() NOT NULL
+    DEFAULT: ((3))
+  NextRetryAt datetime2()(,) NULL
+    DEFAULT: 
+  CreatedDate datetime2()(,) NOT NULL
+    DEFAULT: (sysutcdatetime())
+  ModifiedDate datetime2()(,) NOT NULL
+    DEFAULT: (sysutcdatetime())
+
+TABLE: monitoring.WorkerMetrics
+Created: 06/25/2025 14:13:12
+Modified: 06/25/2025 14:13:12
+------------------------------
+  MetricId uniqueidentifier()(,) NOT NULL [PK]
+    DEFAULT: (newid())
+  WorkerInstanceId uniqueidentifier()(,) NOT NULL
+    DEFAULT: 
+  MetricType nvarchar(50)(,) NOT NULL
+    DEFAULT: 
+  MetricName nvarchar(100)(,) NOT NULL
+    DEFAULT: 
+  MetricValue decimal()(18,4) NOT NULL
+    DEFAULT: 
+  Unit nvarchar(20)(,) NULL
+    DEFAULT: 
+  Tags nvarchar(500)(,) NULL
+    DEFAULT: 
+  Timestamp datetime2()(,) NOT NULL
+    DEFAULT: (sysutcdatetime())
+

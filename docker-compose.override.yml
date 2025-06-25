@@ -1,0 +1,20 @@
+# Override for development environment
+version: '3.8'
+
+services:
+  monitoring-worker:
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - Serilog__MinimumLevel__Default=Debug
+      - Monitoring__Endpoints__0__Name=LocalTest
+      - Monitoring__Endpoints__0__Url=http://httpbin.org/status/200
+      - Monitoring__Endpoints__0__TimeoutSeconds=5
+      - Monitoring__Endpoints__1__Name=DelayTest
+      - Monitoring__Endpoints__1__Url=http://httpbin.org/delay/2
+      - Monitoring__Endpoints__1__TimeoutSeconds=10
+    volumes:
+      - .:/app/source:ro
+      - ./logs:/app/logs
+    ports:
+      - "5000:5000"
+      - "5001:5001"
