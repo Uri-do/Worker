@@ -346,3 +346,76 @@ FodyWeavers.xsd
 # JetBrains Rider
 .idea/
 *.sln.iml
+
+# MonitoringWorker - Large monitoring tools and data files
+# Prometheus tools and data
+tools/
+data/
+prometheus-data/
+grafana-data/
+
+# Prometheus binaries and executables
+*.exe
+prometheus
+promtool
+grafana-server
+
+# Monitoring data directories
+chunks_head/
+wal/
+queries.active
+
+# Large monitoring tool archives
+*.tar.gz
+*.zip
+prometheus-*.windows-amd64/
+grafana-*/
+
+# Test results and coverage reports
+TestResults/
+coverage/
+*.trx
+*.cobertura.xml
+
+# Temporary monitoring files
+*.tmp
+*.temp
+monitoring-*.log
+
+# Configuration files with sensitive data
+**/appsettings.Production.json
+**/appsettings.Staging.json
+**/connectionstrings.json
+
+# Docker volumes and data
+docker-data/
+volumes/
+
+# Backup files
+*.bak
+*.backup
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# IDE and editor files
+*.swp
+*.swo
+*~
+
+# Package manager files
+packages/
+node_modules/
+bower_components/
+
+# Environment files
+.env
+.env.local
+.env.production
+.env.staging
