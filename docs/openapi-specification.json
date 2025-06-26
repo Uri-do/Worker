@@ -1,0 +1,4066 @@
+{
+  "openapi": "3.0.4",
+  "info": {
+    "title": "MonitoringWorker API",
+    "description": "API for managing monitoring worker and endpoints",
+    "contact": {
+      "name": "MonitoringWorker",
+      "email": "support@monitoringworker.com"
+    },
+    "version": "v1"
+  },
+  "paths": {
+    "/api/Auth/login": {
+      "post": {
+        "tags": [
+          "Auth"
+        ],
+        "summary": "Authenticates a user and returns a JWT token",
+        "requestBody": {
+          "description": "Login credentials",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LoginRequest"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LoginRequest"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/LoginRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LoginResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ValidationProblemDetails"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/Auth/me": {
+      "get": {
+        "tags": [
+          "Auth"
+        ],
+        "summary": "Gets current user information",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserInfo"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/Auth/validate": {
+      "post": {
+        "tags": [
+          "Auth"
+        ],
+        "summary": "Validates the current JWT token",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": { }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/Auth/check-permission": {
+      "get": {
+        "tags": [
+          "Auth"
+        ],
+        "summary": "Checks if the current user has a specific permission",
+        "parameters": [
+          {
+            "name": "permission",
+            "in": "query",
+            "description": "Permission to check",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": { }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/Auth/permissions": {
+      "get": {
+        "tags": [
+          "Auth"
+        ],
+        "summary": "Gets available permissions for documentation",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": { }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/Configuration": {
+      "get": {
+        "tags": [
+          "Configuration"
+        ],
+        "summary": "Gets all configuration",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": { }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/Configuration/monitoring": {
+      "get": {
+        "tags": [
+          "Configuration"
+        ],
+        "summary": "Gets monitoring configuration",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MonitoringOptions"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "Configuration"
+        ],
+        "summary": "Updates monitoring configuration",
+        "requestBody": {
+          "description": "New monitoring options",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MonitoringOptions"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MonitoringOptions"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/MonitoringOptions"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": { }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ValidationProblemDetails"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/Configuration/database-monitoring": {
+      "get": {
+        "tags": [
+          "Configuration"
+        ],
+        "summary": "Gets database monitoring configuration",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DatabaseMonitoringOptions"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "Configuration"
+        ],
+        "summary": "Updates database monitoring configuration",
+        "requestBody": {
+          "description": "New database monitoring options",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DatabaseMonitoringOptions"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DatabaseMonitoringOptions"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/DatabaseMonitoringOptions"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": { }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ValidationProblemDetails"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/Configuration/quartz": {
+      "get": {
+        "tags": [
+          "Configuration"
+        ],
+        "summary": "Gets Quartz configuration",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/QuartzOptions"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/Configuration/value/{key}": {
+      "get": {
+        "tags": [
+          "Configuration"
+        ],
+        "summary": "Gets configuration value by key",
+        "parameters": [
+          {
+            "name": "key",
+            "in": "path",
+            "description": "Configuration key",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": { }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "Configuration"
+        ],
+        "summary": "Sets configuration value by key",
+        "parameters": [
+          {
+            "name": "key",
+            "in": "path",
+            "description": "Configuration key",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "description": "Configuration value request",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ConfigurationValueRequest"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ConfigurationValueRequest"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/ConfigurationValueRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": { }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ValidationProblemDetails"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/Configuration/reload": {
+      "post": {
+        "tags": [
+          "Configuration"
+        ],
+        "summary": "Reloads configuration from sources",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": { }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/Configuration/history": {
+      "get": {
+        "tags": [
+          "Configuration"
+        ],
+        "summary": "Gets configuration change history",
+        "parameters": [
+          {
+            "name": "limit",
+            "in": "query",
+            "description": "Maximum number of changes to return",
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 100
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ConfigurationChange"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/database-monitoring/config/connections": {
+      "get": {
+        "tags": [
+          "DatabaseConfiguration"
+        ],
+        "summary": "Get all database connections",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/DatabaseConnectionDto"
+                  }
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/DatabaseConnectionDto"
+                  }
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/DatabaseConnectionDto"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "DatabaseConfiguration"
+        ],
+        "summary": "Create new database connection",
+        "requestBody": {
+          "description": "Connection creation request",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateDatabaseConnectionRequest"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateDatabaseConnectionRequest"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateDatabaseConnectionRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Created",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/DatabaseConnectionDto"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DatabaseConnectionDto"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DatabaseConnectionDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/database-monitoring/config/connections/{connectionId}": {
+      "get": {
+        "tags": [
+          "DatabaseConfiguration"
+        ],
+        "summary": "Get specific database connection",
+        "parameters": [
+          {
+            "name": "connectionId",
+            "in": "path",
+            "description": "Connection ID",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/DatabaseConnectionDto"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DatabaseConnectionDto"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DatabaseConnectionDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "DatabaseConfiguration"
+        ],
+        "summary": "Update database connection",
+        "parameters": [
+          {
+            "name": "connectionId",
+            "in": "path",
+            "description": "Connection ID",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "description": "Connection update request",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateDatabaseConnectionRequest"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateDatabaseConnectionRequest"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateDatabaseConnectionRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/DatabaseConnectionDto"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DatabaseConnectionDto"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DatabaseConnectionDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "DatabaseConfiguration"
+        ],
+        "summary": "Delete database connection",
+        "parameters": [
+          {
+            "name": "connectionId",
+            "in": "path",
+            "description": "Connection ID",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": { }
+              },
+              "application/json": {
+                "schema": { }
+              },
+              "text/json": {
+                "schema": { }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/database-monitoring/config/connections/{connectionId}/test": {
+      "post": {
+        "tags": [
+          "DatabaseConfiguration"
+        ],
+        "summary": "Test database connection",
+        "parameters": [
+          {
+            "name": "connectionId",
+            "in": "path",
+            "description": "Connection ID",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": { }
+              },
+              "application/json": {
+                "schema": { }
+              },
+              "text/json": {
+                "schema": { }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/DatabaseMonitoring/connections/test": {
+      "get": {
+        "tags": [
+          "DatabaseMonitoring"
+        ],
+        "summary": "Tests all configured database connections",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/DatabaseConnectionHealth"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/DatabaseMonitoring/connections/{connectionName}/test": {
+      "get": {
+        "tags": [
+          "DatabaseMonitoring"
+        ],
+        "summary": "Tests a specific database connection",
+        "parameters": [
+          {
+            "name": "connectionName",
+            "in": "path",
+            "description": "Name of the connection to test",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DatabaseConnectionHealth"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/DatabaseMonitoring/queries/execute": {
+      "get": {
+        "tags": [
+          "DatabaseMonitoring"
+        ],
+        "summary": "Executes all configured monitoring queries",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/DatabaseMonitoringResult"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/DatabaseMonitoring/connections/{connectionName}/queries": {
+      "get": {
+        "tags": [
+          "DatabaseMonitoring"
+        ],
+        "summary": "Executes monitoring queries for a specific connection",
+        "parameters": [
+          {
+            "name": "connectionName",
+            "in": "path",
+            "description": "Name of the connection",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/DatabaseMonitoringResult"
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/DatabaseMonitoring/connections/{connectionName}/queries/{queryName}": {
+      "get": {
+        "tags": [
+          "DatabaseMonitoring"
+        ],
+        "summary": "Executes a specific monitoring query",
+        "parameters": [
+          {
+            "name": "connectionName",
+            "in": "path",
+            "description": "Name of the connection",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "queryName",
+            "in": "path",
+            "description": "Name of the query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DatabaseMonitoringResult"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/DatabaseMonitoring/connections/{connectionName}/custom-query": {
+      "post": {
+        "tags": [
+          "DatabaseMonitoring"
+        ],
+        "summary": "Executes a custom SQL query for monitoring",
+        "parameters": [
+          {
+            "name": "connectionName",
+            "in": "path",
+            "description": "Name of the connection",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "description": "Custom query request",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CustomQueryRequest"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CustomQueryRequest"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/CustomQueryRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DatabaseMonitoringResult"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/DatabaseMonitoring/statistics": {
+      "get": {
+        "tags": [
+          "DatabaseMonitoring"
+        ],
+        "summary": "Gets database monitoring statistics",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DatabaseMonitoringStats"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/DatabaseMonitoring/connections": {
+      "get": {
+        "tags": [
+          "DatabaseMonitoring"
+        ],
+        "summary": "Gets list of configured connections",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/DatabaseMonitoring/queries": {
+      "get": {
+        "tags": [
+          "DatabaseMonitoring"
+        ],
+        "summary": "Gets list of configured queries",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": { }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/DatabaseMonitoring/dashboard": {
+      "get": {
+        "tags": [
+          "DatabaseMonitoring"
+        ],
+        "summary": "Gets database monitoring dashboard summary",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": { }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/DatabaseMonitoring/results": {
+      "get": {
+        "tags": [
+          "DatabaseMonitoring"
+        ],
+        "summary": "Gets monitoring results with filtering and pagination",
+        "parameters": [
+          {
+            "name": "connectionName",
+            "in": "query",
+            "description": "Filter by connection name",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "description": "Filter by status",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "environment",
+            "in": "query",
+            "description": "Filter by environment",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "fromDate",
+            "in": "query",
+            "description": "Filter from date",
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          {
+            "name": "toDate",
+            "in": "query",
+            "description": "Filter to date",
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          {
+            "name": "pageSize",
+            "in": "query",
+            "description": "Page size (default: 20)",
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 20
+            }
+          },
+          {
+            "name": "pageNumber",
+            "in": "query",
+            "description": "Page number (default: 1)",
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 1
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": { }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/DatabaseMonitoring/trends": {
+      "get": {
+        "tags": [
+          "DatabaseMonitoring"
+        ],
+        "summary": "Gets monitoring trends and analytics",
+        "parameters": [
+          {
+            "name": "period",
+            "in": "query",
+            "description": "Time period (24h, 7d, 30d)",
+            "schema": {
+              "type": "string",
+              "default": "24h"
+            }
+          },
+          {
+            "name": "groupBy",
+            "in": "query",
+            "description": "Group by (hour, day)",
+            "schema": {
+              "type": "string",
+              "default": "hour"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": { }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api": {
+      "get": {
+        "tags": [
+          "Info"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StringStringStringStringStringStringString<>f__AnonymousType37StringDateTime<>f__AnonymousType36"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/Monitoring/check": {
+      "post": {
+        "tags": [
+          "Monitoring"
+        ],
+        "summary": "Trigger manual monitoring check for all endpoints",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/MonitoringResult"
+                  }
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/MonitoringResult"
+                  }
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/MonitoringResult"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/Monitoring/check/{endpointName}": {
+      "post": {
+        "tags": [
+          "Monitoring"
+        ],
+        "summary": "Trigger manual monitoring check for a specific endpoint",
+        "parameters": [
+          {
+            "name": "endpointName",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/MonitoringResult"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MonitoringResult"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MonitoringResult"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/Monitoring/metrics": {
+      "get": {
+        "tags": [
+          "Monitoring"
+        ],
+        "summary": "Get current monitoring metrics",
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/Monitoring/status": {
+      "get": {
+        "tags": [
+          "Monitoring"
+        ],
+        "summary": "Get monitoring status summary",
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/Monitoring/endpoints": {
+      "get": {
+        "tags": [
+          "Monitoring"
+        ],
+        "summary": "Get list of configured endpoints",
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/Monitoring/history": {
+      "get": {
+        "tags": [
+          "Monitoring"
+        ],
+        "summary": "Get monitoring history/statistics",
+        "parameters": [
+          {
+            "name": "hours",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 24
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/MonitoringConfiguration": {
+      "get": {
+        "tags": [
+          "MonitoringConfiguration"
+        ],
+        "summary": "Get current monitoring configuration",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MonitoringConfiguration"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/MonitoringConfiguration/status": {
+      "get": {
+        "tags": [
+          "MonitoringConfiguration"
+        ],
+        "summary": "Get monitoring configuration status",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": { }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/MonitoringConfiguration/features": {
+      "get": {
+        "tags": [
+          "MonitoringConfiguration"
+        ],
+        "summary": "Get all feature toggles and their status",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": {
+                    "type": "boolean"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/MonitoringConfiguration/features/{featureName}": {
+      "get": {
+        "tags": [
+          "MonitoringConfiguration"
+        ],
+        "summary": "Check if a specific feature is enabled",
+        "parameters": [
+          {
+            "name": "featureName",
+            "in": "path",
+            "description": "Name of the feature to check",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": { }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/MonitoringConfiguration/features/enabled": {
+      "get": {
+        "tags": [
+          "MonitoringConfiguration"
+        ],
+        "summary": "Get enabled features only",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/MonitoringConfiguration/summary": {
+      "get": {
+        "tags": [
+          "MonitoringConfiguration"
+        ],
+        "summary": "Get configuration summary for dashboard display",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": { }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/MonitoringConfiguration/validate": {
+      "post": {
+        "tags": [
+          "MonitoringConfiguration"
+        ],
+        "summary": "Validate current configuration",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": { }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/MonitoringConfiguration/recommendations": {
+      "get": {
+        "tags": [
+          "MonitoringConfiguration"
+        ],
+        "summary": "Get configuration recommendations",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": { }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/": {
+      "get": {
+        "tags": [
+          "MonitoringWorker"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/Worker/status": {
+      "get": {
+        "tags": [
+          "Worker"
+        ],
+        "summary": "Get current worker status",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/WorkerStatus"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/WorkerStatus"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/WorkerStatus"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/Worker/start": {
+      "post": {
+        "tags": [
+          "Worker"
+        ],
+        "summary": "Start the monitoring worker",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/OperationResult"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OperationResult"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OperationResult"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/Worker/stop": {
+      "post": {
+        "tags": [
+          "Worker"
+        ],
+        "summary": "Stop the monitoring worker",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/OperationResult"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OperationResult"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OperationResult"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/Worker/restart": {
+      "post": {
+        "tags": [
+          "Worker"
+        ],
+        "summary": "Restart the monitoring worker",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/OperationResult"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OperationResult"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OperationResult"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/Worker/jobs/{jobName}/pause": {
+      "post": {
+        "tags": [
+          "Worker"
+        ],
+        "summary": "Pause a specific job",
+        "parameters": [
+          {
+            "name": "jobName",
+            "in": "path",
+            "description": "Name of the job to pause",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/OperationResult"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OperationResult"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OperationResult"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/Worker/jobs/{jobName}/resume": {
+      "post": {
+        "tags": [
+          "Worker"
+        ],
+        "summary": "Resume a specific job",
+        "parameters": [
+          {
+            "name": "jobName",
+            "in": "path",
+            "description": "Name of the job to resume",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/OperationResult"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OperationResult"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OperationResult"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/Worker/metrics": {
+      "get": {
+        "tags": [
+          "Worker"
+        ],
+        "summary": "Get detailed worker metrics",
+        "parameters": [
+          {
+            "name": "metricType",
+            "in": "query",
+            "description": "Filter by metric type",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "fromDate",
+            "in": "query",
+            "description": "Filter from date",
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          {
+            "name": "toDate",
+            "in": "query",
+            "description": "Filter to date",
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/Worker/instances": {
+      "get": {
+        "tags": [
+          "Worker"
+        ],
+        "summary": "Get worker instances overview",
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/Worker/jobs": {
+      "get": {
+        "tags": [
+          "Worker"
+        ],
+        "summary": "Get worker jobs with filtering",
+        "parameters": [
+          {
+            "name": "status",
+            "in": "query",
+            "description": "Filter by job status",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "jobType",
+            "in": "query",
+            "description": "Filter by job type",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "pageSize",
+            "in": "query",
+            "description": "Page size (default: 20)",
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 20
+            }
+          },
+          {
+            "name": "pageNumber",
+            "in": "query",
+            "description": "Page number (default: 1)",
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 1
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "AlertingConfiguration": {
+        "type": "object",
+        "properties": {
+          "enabled": {
+            "type": "boolean",
+            "description": "Enable alerting rules"
+          },
+          "enableJobFailureAlerts": {
+            "type": "boolean",
+            "description": "Enable job failure alerts"
+          },
+          "enableHealthCheckAlerts": {
+            "type": "boolean",
+            "description": "Enable health check failure alerts"
+          },
+          "enablePerformanceAlerts": {
+            "type": "boolean",
+            "description": "Enable performance degradation alerts"
+          },
+          "enableSystemResourceAlerts": {
+            "type": "boolean",
+            "description": "Enable system resource alerts"
+          },
+          "jobFailureThreshold": {
+            "maximum": 100,
+            "minimum": 1,
+            "type": "integer",
+            "description": "Job failure threshold (failures per minute)",
+            "format": "int32"
+          },
+          "healthCheckFailureThreshold": {
+            "maximum": 20,
+            "minimum": 1,
+            "type": "integer",
+            "description": "Health check failure threshold (consecutive failures)",
+            "format": "int32"
+          },
+          "performanceThresholdMs": {
+            "maximum": 30000,
+            "minimum": 100,
+            "type": "integer",
+            "description": "Performance alert threshold (95th percentile in milliseconds)",
+            "format": "int32"
+          }
+        },
+        "additionalProperties": false,
+        "description": "Alerting configuration"
+      },
+      "ConfigurationChange": {
+        "type": "object",
+        "properties": {
+          "timestamp": {
+            "type": "string",
+            "description": "Change timestamp",
+            "format": "date-time"
+          },
+          "key": {
+            "type": "string",
+            "description": "Configuration key that changed",
+            "nullable": true
+          },
+          "oldValue": {
+            "type": "string",
+            "description": "Old value",
+            "nullable": true
+          },
+          "newValue": {
+            "type": "string",
+            "description": "New value",
+            "nullable": true
+          },
+          "changedBy": {
+            "type": "string",
+            "description": "User who made the change",
+            "nullable": true
+          },
+          "reason": {
+            "type": "string",
+            "description": "Change reason/description",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false,
+        "description": "Configuration change record"
+      },
+      "ConfigurationValueRequest": {
+        "required": [
+          "value"
+        ],
+        "type": "object",
+        "properties": {
+          "value": {
+            "minLength": 1,
+            "type": "string",
+            "description": "Configuration value"
+          }
+        },
+        "additionalProperties": false,
+        "description": "Configuration value request model"
+      },
+      "CreateDatabaseConnectionRequest": {
+        "required": [
+          "connectionName",
+          "connectionString",
+          "environment",
+          "provider"
+        ],
+        "type": "object",
+        "properties": {
+          "connectionName": {
+            "maxLength": 100,
+            "minLength": 0,
+            "type": "string"
+          },
+          "provider": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "connectionString": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "environment": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "tags": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "nullable": true
+          },
+          "connectionTimeoutSeconds": {
+            "maximum": 300,
+            "minimum": 1,
+            "type": "integer",
+            "format": "int32"
+          },
+          "commandTimeoutSeconds": {
+            "maximum": 300,
+            "minimum": 1,
+            "type": "integer",
+            "format": "int32"
+          },
+          "isEnabled": {
+            "type": "boolean"
+          }
+        },
+        "additionalProperties": false,
+        "description": "Create database connection request"
+      },
+      "CustomQueryRequest": {
+        "required": [
+          "sql"
+        ],
+        "type": "object",
+        "properties": {
+          "sql": {
+            "minLength": 1,
+            "type": "string",
+            "description": "SQL query to execute"
+          },
+          "parameters": {
+            "type": "object",
+            "additionalProperties": { },
+            "description": "Query parameters",
+            "nullable": true
+          },
+          "timeoutSeconds": {
+            "maximum": 300,
+            "minimum": 1,
+            "type": "integer",
+            "description": "Query timeout in seconds",
+            "format": "int32"
+          }
+        },
+        "additionalProperties": false,
+        "description": "Custom query request model"
+      },
+      "DashboardConfiguration": {
+        "type": "object",
+        "properties": {
+          "enabled": {
+            "type": "boolean",
+            "description": "Enable dashboard generation and provisioning"
+          },
+          "enableBasicDashboard": {
+            "type": "boolean",
+            "description": "Generate basic monitoring dashboard"
+          },
+          "enablePerformanceDashboard": {
+            "type": "boolean",
+            "description": "Generate detailed performance dashboard"
+          },
+          "enableSystemDashboard": {
+            "type": "boolean",
+            "description": "Generate system resource dashboard"
+          },
+          "refreshIntervalSeconds": {
+            "maximum": 300,
+            "minimum": 5,
+            "type": "integer",
+            "description": "Auto-refresh interval for dashboards in seconds",
+            "format": "int32"
+          }
+        },
+        "additionalProperties": false,
+        "description": "Dashboard configuration"
+      },
+      "DatabaseConnectionConfig": {
+        "required": [
+          "connectionString",
+          "name",
+          "provider"
+        ],
+        "type": "object",
+        "properties": {
+          "name": {
+            "maxLength": 100,
+            "minLength": 1,
+            "type": "string",
+            "description": "Connection name/identifier"
+          },
+          "connectionString": {
+            "minLength": 1,
+            "type": "string",
+            "description": "Connection string"
+          },
+          "provider": {
+            "minLength": 1,
+            "type": "string",
+            "description": "Database provider (SqlServer, PostgreSQL, MySQL, etc.)"
+          },
+          "connectionTimeoutSeconds": {
+            "maximum": 300,
+            "minimum": 1,
+            "type": "integer",
+            "description": "Connection timeout in seconds (overrides default)",
+            "format": "int32",
+            "nullable": true
+          },
+          "commandTimeoutSeconds": {
+            "maximum": 300,
+            "minimum": 1,
+            "type": "integer",
+            "description": "Command timeout in seconds (overrides default)",
+            "format": "int32",
+            "nullable": true
+          },
+          "enabled": {
+            "type": "boolean",
+            "description": "Whether this connection is enabled for monitoring"
+          },
+          "tags": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Tags for categorizing connections",
+            "nullable": true
+          },
+          "environment": {
+            "type": "string",
+            "description": "Environment (Development, Staging, Production)",
+            "nullable": true
+          },
+          "queryNames": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Queries to run for this specific connection",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false,
+        "description": "Database connection configuration"
+      },
+      "DatabaseConnectionDto": {
+        "type": "object",
+        "properties": {
+          "connectionId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "connectionName": {
+            "type": "string",
+            "nullable": true
+          },
+          "provider": {
+            "type": "string",
+            "nullable": true
+          },
+          "environment": {
+            "type": "string",
+            "nullable": true
+          },
+          "tags": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "nullable": true
+          },
+          "connectionTimeoutSeconds": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "commandTimeoutSeconds": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "isEnabled": {
+            "type": "boolean"
+          },
+          "createdDate": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "modifiedDate": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "additionalProperties": false,
+        "description": "Database connection DTO (excludes sensitive connection string)"
+      },
+      "DatabaseConnectionHealth": {
+        "type": "object",
+        "properties": {
+          "connectionName": {
+            "type": "string",
+            "description": "Connection name",
+            "nullable": true
+          },
+          "status": {
+            "$ref": "#/components/schemas/MonitoringStatus"
+          },
+          "message": {
+            "type": "string",
+            "description": "Status message",
+            "nullable": true
+          },
+          "timestamp": {
+            "type": "string",
+            "description": "Connection test timestamp",
+            "format": "date-time"
+          },
+          "durationMs": {
+            "type": "integer",
+            "description": "Connection test duration in milliseconds",
+            "format": "int64"
+          },
+          "serverVersion": {
+            "type": "string",
+            "description": "Database server version",
+            "nullable": true
+          },
+          "databaseName": {
+            "type": "string",
+            "description": "Database name",
+            "nullable": true
+          },
+          "details": {
+            "description": "Connection details",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false,
+        "description": "Database connection health information"
+      },
+      "DatabaseMonitoringOptions": {
+        "required": [
+          "connections"
+        ],
+        "type": "object",
+        "properties": {
+          "enabled": {
+            "type": "boolean",
+            "description": "Whether database monitoring is enabled"
+          },
+          "defaultConnectionTimeoutSeconds": {
+            "maximum": 300,
+            "minimum": 1,
+            "type": "integer",
+            "description": "Default connection timeout in seconds",
+            "format": "int32"
+          },
+          "defaultCommandTimeoutSeconds": {
+            "maximum": 300,
+            "minimum": 1,
+            "type": "integer",
+            "description": "Default command timeout in seconds",
+            "format": "int32"
+          },
+          "maxConcurrentConnections": {
+            "maximum": 100,
+            "minimum": 1,
+            "type": "integer",
+            "description": "Maximum number of concurrent database connections",
+            "format": "int32"
+          },
+          "connections": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DatabaseConnectionConfig"
+            },
+            "description": "Database connections to monitor"
+          },
+          "queries": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DatabaseQueryConfig"
+            },
+            "description": "Predefined monitoring queries",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false,
+        "description": "Database monitoring configuration options"
+      },
+      "DatabaseMonitoringResult": {
+        "type": "object",
+        "properties": {
+          "connectionName": {
+            "type": "string",
+            "description": "Connection name",
+            "nullable": true
+          },
+          "queryName": {
+            "type": "string",
+            "description": "Query name",
+            "nullable": true
+          },
+          "status": {
+            "$ref": "#/components/schemas/MonitoringStatus"
+          },
+          "message": {
+            "type": "string",
+            "description": "Result message",
+            "nullable": true
+          },
+          "timestamp": {
+            "type": "string",
+            "description": "Query execution time",
+            "format": "date-time"
+          },
+          "durationMs": {
+            "type": "integer",
+            "description": "Query duration in milliseconds",
+            "format": "int64"
+          },
+          "resultValue": {
+            "description": "Query result value",
+            "nullable": true
+          },
+          "details": {
+            "description": "Additional result details",
+            "nullable": true
+          },
+          "provider": {
+            "type": "string",
+            "description": "Database provider",
+            "nullable": true
+          },
+          "environment": {
+            "type": "string",
+            "description": "Environment",
+            "nullable": true
+          },
+          "tags": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Connection tags",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false,
+        "description": "Database monitoring result"
+      },
+      "DatabaseMonitoringStats": {
+        "type": "object",
+        "properties": {
+          "totalConnections": {
+            "type": "integer",
+            "description": "Total connections monitored",
+            "format": "int32"
+          },
+          "healthyConnections": {
+            "type": "integer",
+            "description": "Healthy connections count",
+            "format": "int32"
+          },
+          "unhealthyConnections": {
+            "type": "integer",
+            "description": "Unhealthy connections count",
+            "format": "int32"
+          },
+          "errorConnections": {
+            "type": "integer",
+            "description": "Error connections count",
+            "format": "int32"
+          },
+          "totalQueries": {
+            "type": "integer",
+            "description": "Total queries executed",
+            "format": "int32"
+          },
+          "successfulQueries": {
+            "type": "integer",
+            "description": "Successful queries count",
+            "format": "int32"
+          },
+          "failedQueries": {
+            "type": "integer",
+            "description": "Failed queries count",
+            "format": "int32"
+          },
+          "averageQueryDurationMs": {
+            "type": "number",
+            "description": "Average query duration in milliseconds",
+            "format": "double"
+          },
+          "lastRunTimestamp": {
+            "type": "string",
+            "description": "Last monitoring run timestamp",
+            "format": "date-time"
+          },
+          "byEnvironment": {
+            "type": "object",
+            "additionalProperties": {
+              "$ref": "#/components/schemas/EnvironmentStats"
+            },
+            "description": "Statistics by environment",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false,
+        "description": "Database monitoring statistics"
+      },
+      "DatabaseQueryConfig": {
+        "required": [
+          "name",
+          "sql"
+        ],
+        "type": "object",
+        "properties": {
+          "name": {
+            "maxLength": 100,
+            "minLength": 1,
+            "type": "string",
+            "description": "Query name/identifier"
+          },
+          "sql": {
+            "minLength": 1,
+            "type": "string",
+            "description": "SQL query to execute"
+          },
+          "description": {
+            "type": "string",
+            "description": "Query description",
+            "nullable": true
+          },
+          "type": {
+            "type": "string",
+            "description": "Query type (HealthCheck, Performance, Custom)",
+            "nullable": true
+          },
+          "resultType": {
+            "type": "string",
+            "description": "Expected result type (Scalar, Table, NonQuery)",
+            "nullable": true
+          },
+          "expectedValue": {
+            "description": "Expected value for health check queries",
+            "nullable": true
+          },
+          "comparisonOperator": {
+            "type": "string",
+            "description": "Comparison operator for expected value (Equals, GreaterThan, LessThan, etc.)",
+            "nullable": true
+          },
+          "warningThreshold": {
+            "type": "number",
+            "description": "Warning threshold for numeric results",
+            "format": "double",
+            "nullable": true
+          },
+          "criticalThreshold": {
+            "type": "number",
+            "description": "Critical threshold for numeric results",
+            "format": "double",
+            "nullable": true
+          },
+          "timeoutSeconds": {
+            "maximum": 300,
+            "minimum": 1,
+            "type": "integer",
+            "description": "Query timeout in seconds (overrides connection default)",
+            "format": "int32",
+            "nullable": true
+          },
+          "enabled": {
+            "type": "boolean",
+            "description": "Whether this query is enabled"
+          },
+          "parameters": {
+            "type": "object",
+            "additionalProperties": { },
+            "description": "Query parameters",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false,
+        "description": "Database query configuration for monitoring"
+      },
+      "EndpointConfig": {
+        "required": [
+          "name",
+          "url"
+        ],
+        "type": "object",
+        "properties": {
+          "name": {
+            "maxLength": 100,
+            "minLength": 1,
+            "type": "string",
+            "description": "Display name for the endpoint"
+          },
+          "url": {
+            "minLength": 1,
+            "type": "string",
+            "description": "URL to monitor",
+            "format": "uri"
+          },
+          "timeoutSeconds": {
+            "maximum": 300,
+            "minimum": 1,
+            "type": "integer",
+            "description": "Timeout in seconds for this specific endpoint (optional)",
+            "format": "int32",
+            "nullable": true
+          },
+          "method": {
+            "type": "string",
+            "description": "HTTP method to use for the check (default: GET)",
+            "nullable": true
+          },
+          "expectedStatusCodes": {
+            "type": "array",
+            "items": {
+              "type": "integer",
+              "format": "int32"
+            },
+            "description": "Expected HTTP status codes that indicate success",
+            "nullable": true
+          },
+          "headers": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "string"
+            },
+            "description": "Additional headers to send with the request",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false,
+        "description": "Configuration for a monitoring endpoint"
+      },
+      "EnvironmentStats": {
+        "type": "object",
+        "properties": {
+          "environment": {
+            "type": "string",
+            "description": "Environment name",
+            "nullable": true
+          },
+          "connectionCount": {
+            "type": "integer",
+            "description": "Connection count",
+            "format": "int32"
+          },
+          "healthyCount": {
+            "type": "integer",
+            "description": "Healthy connections",
+            "format": "int32"
+          },
+          "unhealthyCount": {
+            "type": "integer",
+            "description": "Unhealthy connections",
+            "format": "int32"
+          },
+          "errorCount": {
+            "type": "integer",
+            "description": "Error connections",
+            "format": "int32"
+          },
+          "averageResponseTimeMs": {
+            "type": "number",
+            "description": "Average response time",
+            "format": "double"
+          }
+        },
+        "additionalProperties": false,
+        "description": "Environment-specific statistics"
+      },
+      "HealthCheckConfiguration": {
+        "type": "object",
+        "properties": {
+          "enabled": {
+            "type": "boolean",
+            "description": "Enable health check endpoint"
+          },
+          "endpointPath": {
+            "type": "string",
+            "description": "Health check endpoint path",
+            "nullable": true
+          },
+          "intervalSeconds": {
+            "maximum": 3600,
+            "minimum": 1,
+            "type": "integer",
+            "description": "Health check interval in seconds",
+            "format": "int32"
+          },
+          "enableDetailedResponses": {
+            "type": "boolean",
+            "description": "Enable detailed health check responses"
+          },
+          "timeoutSeconds": {
+            "maximum": 300,
+            "minimum": 1,
+            "type": "integer",
+            "description": "Health check timeout in seconds",
+            "format": "int32"
+          }
+        },
+        "additionalProperties": false,
+        "description": "Health check configuration"
+      },
+      "JobInfo": {
+        "type": "object",
+        "properties": {
+          "jobName": {
+            "type": "string",
+            "nullable": true
+          },
+          "jobGroup": {
+            "type": "string",
+            "nullable": true
+          },
+          "triggerName": {
+            "type": "string",
+            "nullable": true
+          },
+          "triggerGroup": {
+            "type": "string",
+            "nullable": true
+          },
+          "state": {
+            "type": "string",
+            "nullable": true
+          },
+          "nextFireTime": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "previousFireTime": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "description": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false,
+        "description": "Job information"
+      },
+      "LoginRequest": {
+        "required": [
+          "password",
+          "username"
+        ],
+        "type": "object",
+        "properties": {
+          "username": {
+            "maxLength": 100,
+            "minLength": 3,
+            "type": "string",
+            "description": "Username for authentication"
+          },
+          "password": {
+            "maxLength": 100,
+            "minLength": 6,
+            "type": "string",
+            "description": "Password for authentication"
+          }
+        },
+        "additionalProperties": false,
+        "description": "Login request model"
+      },
+      "LoginResponse": {
+        "type": "object",
+        "properties": {
+          "accessToken": {
+            "type": "string",
+            "description": "JWT access token",
+            "nullable": true
+          },
+          "tokenType": {
+            "type": "string",
+            "description": "Token type (Bearer)",
+            "nullable": true
+          },
+          "expiresIn": {
+            "type": "integer",
+            "description": "Token expiration time in seconds",
+            "format": "int32"
+          },
+          "user": {
+            "$ref": "#/components/schemas/UserInfo"
+          }
+        },
+        "additionalProperties": false,
+        "description": "Login response model"
+      },
+      "MetricsConfiguration": {
+        "type": "object",
+        "properties": {
+          "enableBasicMetrics": {
+            "type": "boolean",
+            "description": "Enable basic application metrics (jobs, health checks)"
+          },
+          "enableDetailedMetrics": {
+            "type": "boolean",
+            "description": "Enable detailed performance metrics (histograms, percentiles)"
+          },
+          "enableSystemMetrics": {
+            "type": "boolean",
+            "description": "Enable system resource metrics (CPU, memory)"
+          },
+          "enableHttpMetrics": {
+            "type": "boolean",
+            "description": "Enable HTTP request metrics"
+          },
+          "enableCustomMetrics": {
+            "type": "boolean",
+            "description": "Enable custom business metrics"
+          },
+          "endpointPath": {
+            "type": "string",
+            "description": "Metrics endpoint path",
+            "nullable": true
+          },
+          "collectionIntervalSeconds": {
+            "maximum": 3600,
+            "minimum": 1,
+            "type": "integer",
+            "description": "Metrics collection interval in seconds",
+            "format": "int32"
+          }
+        },
+        "additionalProperties": false,
+        "description": "Metrics collection configuration"
+      },
+      "MonitoringConfiguration": {
+        "type": "object",
+        "properties": {
+          "enabled": {
+            "type": "boolean",
+            "description": "Enable or disable all monitoring features"
+          },
+          "metrics": {
+            "$ref": "#/components/schemas/MetricsConfiguration"
+          },
+          "healthChecks": {
+            "$ref": "#/components/schemas/HealthCheckConfiguration"
+          },
+          "dashboards": {
+            "$ref": "#/components/schemas/DashboardConfiguration"
+          },
+          "alerting": {
+            "$ref": "#/components/schemas/AlertingConfiguration"
+          },
+          "performance": {
+            "$ref": "#/components/schemas/PerformanceConfiguration"
+          }
+        },
+        "additionalProperties": false,
+        "description": "Configuration settings for monitoring features"
+      },
+      "MonitoringMetrics": {
+        "type": "object",
+        "properties": {
+          "totalChecks": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "successfulChecks": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "failedChecks": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "errorChecks": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "successRate": {
+            "type": "number",
+            "format": "double"
+          },
+          "totalJobs": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "successfulJobs": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "failedJobs": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "cancelledJobs": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "lastHeartbeat": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "uptime": {
+            "type": "string",
+            "format": "date-span"
+          }
+        },
+        "additionalProperties": false,
+        "description": "Monitoring metrics"
+      },
+      "MonitoringOptions": {
+        "required": [
+          "endpoints"
+        ],
+        "type": "object",
+        "properties": {
+          "endpoints": {
+            "minItems": 1,
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/EndpointConfig"
+            },
+            "description": "List of endpoints to monitor"
+          },
+          "defaultTimeoutSeconds": {
+            "maximum": 300,
+            "minimum": 1,
+            "type": "integer",
+            "description": "Default timeout in seconds for HTTP requests",
+            "format": "int32"
+          }
+        },
+        "additionalProperties": false,
+        "description": "Configuration options for the monitoring service"
+      },
+      "MonitoringResult": {
+        "type": "object",
+        "properties": {
+          "checkName": {
+            "type": "string",
+            "description": "The name of the check that was performed",
+            "nullable": true
+          },
+          "status": {
+            "$ref": "#/components/schemas/MonitoringStatus"
+          },
+          "message": {
+            "type": "string",
+            "description": "A human-readable message describing the result",
+            "nullable": true
+          },
+          "details": {
+            "description": "Additional details about the check result",
+            "nullable": true
+          },
+          "timestamp": {
+            "type": "string",
+            "description": "The timestamp when the check was performed",
+            "format": "date-time"
+          },
+          "durationMs": {
+            "type": "integer",
+            "description": "The duration of the check in milliseconds",
+            "format": "int64"
+          }
+        },
+        "additionalProperties": false,
+        "description": "Represents the result of a monitoring check"
+      },
+      "MonitoringStatus": {
+        "enum": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5
+        ],
+        "type": "integer",
+        "description": "Represents the status of a monitoring check",
+        "format": "int32"
+      },
+      "OperationResult": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean"
+          },
+          "message": {
+            "type": "string",
+            "nullable": true
+          },
+          "details": {
+            "type": "string",
+            "nullable": true
+          },
+          "data": {
+            "nullable": true
+          }
+        },
+        "additionalProperties": false,
+        "description": "Operation result"
+      },
+      "PerformanceConfiguration": {
+        "type": "object",
+        "properties": {
+          "enabled": {
+            "type": "boolean",
+            "description": "Enable performance tracking"
+          },
+          "enableDurationTracking": {
+            "type": "boolean",
+            "description": "Enable request duration tracking"
+          },
+          "enableMemoryTracking": {
+            "type": "boolean",
+            "description": "Enable memory usage tracking"
+          },
+          "enableCpuTracking": {
+            "type": "boolean",
+            "description": "Enable CPU usage tracking"
+          },
+          "enableGcTracking": {
+            "type": "boolean",
+            "description": "Enable garbage collection tracking"
+          },
+          "samplingRate": {
+            "maximum": 1,
+            "minimum": 0,
+            "type": "number",
+            "description": "Performance sampling rate (0.0 to 1.0)",
+            "format": "double"
+          },
+          "retentionDays": {
+            "maximum": 365,
+            "minimum": 1,
+            "type": "integer",
+            "description": "Performance data retention in days",
+            "format": "int32"
+          }
+        },
+        "additionalProperties": false,
+        "description": "Performance monitoring configuration"
+      },
+      "ProblemDetails": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "nullable": true
+          },
+          "title": {
+            "type": "string",
+            "nullable": true
+          },
+          "status": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "detail": {
+            "type": "string",
+            "nullable": true
+          },
+          "instance": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": { }
+      },
+      "QuartzOptions": {
+        "required": [
+          "cronSchedule"
+        ],
+        "type": "object",
+        "properties": {
+          "cronSchedule": {
+            "minLength": 1,
+            "type": "string",
+            "description": "Cron expression for scheduling monitoring jobs"
+          },
+          "maxConcurrentJobs": {
+            "maximum": 10,
+            "minimum": 1,
+            "type": "integer",
+            "description": "Maximum number of concurrent jobs",
+            "format": "int32"
+          },
+          "waitForJobsToComplete": {
+            "type": "boolean",
+            "description": "Whether to wait for jobs to complete on shutdown"
+          }
+        },
+        "additionalProperties": false,
+        "description": "Configuration options for Quartz scheduling"
+      },
+      "StringStringStringString<>f__AnonymousType37": {
+        "type": "object",
+        "properties": {
+          "swagger": {
+            "type": "string",
+            "nullable": true
+          },
+          "health": {
+            "type": "string",
+            "nullable": true
+          },
+          "signalR": {
+            "type": "string",
+            "nullable": true
+          },
+          "api": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "StringStringStringStringStringStringString<>f__AnonymousType37StringDateTime<>f__AnonymousType36": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "nullable": true
+          },
+          "version": {
+            "type": "string",
+            "nullable": true
+          },
+          "description": {
+            "type": "string",
+            "nullable": true
+          },
+          "endpoints": {
+            "$ref": "#/components/schemas/StringStringStringString<>f__AnonymousType37"
+          },
+          "status": {
+            "type": "string",
+            "nullable": true
+          },
+          "timestamp": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "additionalProperties": false
+      },
+      "UpdateDatabaseConnectionRequest": {
+        "required": [
+          "connectionName",
+          "environment",
+          "provider"
+        ],
+        "type": "object",
+        "properties": {
+          "connectionName": {
+            "maxLength": 100,
+            "minLength": 0,
+            "type": "string"
+          },
+          "provider": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "connectionString": {
+            "type": "string",
+            "nullable": true
+          },
+          "environment": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "tags": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "nullable": true
+          },
+          "connectionTimeoutSeconds": {
+            "maximum": 300,
+            "minimum": 1,
+            "type": "integer",
+            "format": "int32"
+          },
+          "commandTimeoutSeconds": {
+            "maximum": 300,
+            "minimum": 1,
+            "type": "integer",
+            "format": "int32"
+          },
+          "isEnabled": {
+            "type": "boolean"
+          }
+        },
+        "additionalProperties": false,
+        "description": "Update database connection request"
+      },
+      "UserInfo": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "User ID",
+            "nullable": true
+          },
+          "username": {
+            "type": "string",
+            "description": "Username",
+            "nullable": true
+          },
+          "roles": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "User roles",
+            "nullable": true
+          },
+          "permissions": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "User permissions",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false,
+        "description": "User information model"
+      },
+      "ValidationProblemDetails": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "nullable": true
+          },
+          "title": {
+            "type": "string",
+            "nullable": true
+          },
+          "status": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "detail": {
+            "type": "string",
+            "nullable": true
+          },
+          "instance": {
+            "type": "string",
+            "nullable": true
+          },
+          "errors": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "nullable": true
+          }
+        },
+        "additionalProperties": { }
+      },
+      "WorkerStatus": {
+        "type": "object",
+        "properties": {
+          "isRunning": {
+            "type": "boolean"
+          },
+          "isStarted": {
+            "type": "boolean"
+          },
+          "isShutdown": {
+            "type": "boolean"
+          },
+          "startTime": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "jobs": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/JobInfo"
+            },
+            "nullable": true
+          },
+          "metrics": {
+            "$ref": "#/components/schemas/MonitoringMetrics"
+          }
+        },
+        "additionalProperties": false,
+        "description": "Worker status information"
+      }
+    },
+    "securitySchemes": {
+      "Bearer": {
+        "type": "apiKey",
+        "description": "JWT Authorization header using the Bearer scheme. Example: \"Authorization: Bearer {token}\"",
+        "name": "Authorization",
+        "in": "header"
+      }
+    }
+  },
+  "security": [
+    {
+      "Bearer": [ ]
+    }
+  ]
+}

@@ -1,0 +1,47 @@
+# Grafana Datasource Configuration
+# This automatically configures Prometheus as a data source when Grafana starts
+
+apiVersion: 1
+
+datasources:
+  - name: Prometheus
+    type: prometheus
+    access: proxy
+    url: http://prometheus:9090
+    isDefault: true
+    editable: true
+    
+    # Basic settings
+    basicAuth: false
+    withCredentials: false
+    
+    # JSON data for additional configuration
+    jsonData:
+      # HTTP method for queries
+      httpMethod: POST
+      
+      # Query timeout
+      queryTimeout: 60s
+      
+      # Default query type
+      defaultRegion: default
+      
+      # Time interval settings
+      timeInterval: 15s
+      
+      # Custom query parameters
+      customQueryParameters: ''
+      
+      # Prometheus-specific settings
+      prometheusType: Prometheus
+      prometheusVersion: 2.47.0
+      
+      # Disable metrics lookup (for better performance)
+      disableMetricsLookup: false
+      
+      # Enable exemplars
+      exemplarTraceIdDestinations: []
+      
+    # Health check settings
+    uid: prometheus-uid
+    version: 1

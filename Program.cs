@@ -10,6 +10,8 @@ using MonitoringWorker.Jobs;
 using MonitoringWorker.Middleware;
 using MonitoringWorker.Models;
 using MonitoringWorker.Services;
+using OpenTelemetry.Metrics;
+using OpenTelemetry.Trace;
 using Polly;
 using Quartz;
 using Serilog;
@@ -41,15 +43,37 @@ builder.Services.AddOptions<DatabaseMonitoringOptions>()
     .ValidateDataAnnotations()
     .ValidateOnStart();
 
+// Enhanced monitoring configuration
+builder.Services.AddMonitoringConfiguration(builder.Configuration);
+
 // Core services
 builder.Services.AddMemoryCache();
 builder.Services.AddSingleton<IEventNotificationService, EventNotificationService>();
 builder.Services.AddSingleton<IMetricsService, MetricsService>();
 builder.Services.AddSingleton<IConfigurationService, ConfigurationService>();
 builder.Services.AddSingleton<IConfigurationValidationService, ConfigurationValidationService>();
+builder.Services.AddSingleton<IFeatureToggleService, FeatureToggleService>();
 builder.Services.AddScoped<IMonitoringService, MonitoringService>();
 builder.Services.AddScoped<IAuthenticationService, AuthenticationService>();
 builder.Services.AddScoped<IDatabaseMonitoringService, DatabaseMonitoringService>();
+
+// OpenTelemetry configuration
+builder.Services.AddOpenTelemetry()
+    .WithMetrics(builder =>
+    {
+        builder
+            .AddMeter("MonitoringWorker.Metrics")
+            .AddAspNetCoreInstrumentation()
+            .AddHttpClientInstrumentation()
+            .AddPrometheusExporter();
+    })
+    .WithTracing(builder =>
+    {
+        builder
+            .AddAspNetCoreInstrumentation()
+            .AddHttpClientInstrumentation()
+            .AddSqlClientInstrumentation();
+    });
 
 // HTTP clients with resilience policies
 builder.Services.AddHttpClient<IMonitoringService, MonitoringService>(client =>
@@ -398,6 +422,9 @@ app.MapHealthChecks("/healthz", new HealthCheckOptions
     }
 });
 
+// Prometheus metrics endpoint
+app.MapPrometheusScrapingEndpoint();
+
 // Log startup information
 var logger = app.Services.GetRequiredService<ILogger<Program>>();
 logger.LogInformation("Starting MonitoringWorker application");
@@ -442,3 +469,6 @@ finally
     // Small delay to ensure cleanup
     await Task.Delay(1000);
 }
+
+// Make Program class accessible for testing
+public partial class Program { }

@@ -1,0 +1,271 @@
+groups:
+  - name: monitoring_worker_critical
+    rules:
+      # Worker Down Alert
+      - alert: MonitoringWorkerDown
+        expr: up{job="monitoring-worker"} == 0
+        for: 1m
+        labels:
+          severity: critical
+          service: monitoring-worker
+          category: availability
+        annotations:
+          summary: "MonitoringWorker is down"
+          description: "MonitoringWorker has been down for more than 1 minute. No metrics are being collected."
+          runbook_url: "https://docs.company.com/runbooks/monitoring-worker-down"
+
+      # High Job Failure Rate
+      - alert: HighJobFailureRate
+        expr: |
+          (
+            rate(monitoring_worker_jobs_failed_total[5m]) /
+            rate(monitoring_worker_jobs_started_total[5m])
+          ) * 100 > 20
+        for: 2m
+        labels:
+          severity: critical
+          service: monitoring-worker
+          category: reliability
+        annotations:
+          summary: "High job failure rate detected"
+          description: "Job failure rate is {{ $value | humanizePercentage }} over the last 5 minutes"
+          runbook_url: "https://docs.company.com/runbooks/high-job-failure-rate"
+
+      # Health Check Failures
+      - alert: HealthCheckFailures
+        expr: |
+          increase(monitoring_worker_checks_total{status="error"}[5m]) > 3
+        for: 1m
+        labels:
+          severity: critical
+          service: monitoring-worker
+          category: health
+        annotations:
+          summary: "Multiple health check failures"
+          description: "{{ $value }} health check failures in the last 5 minutes"
+          runbook_url: "https://docs.company.com/runbooks/health-check-failures"
+
+  - name: monitoring_worker_warning
+    rules:
+      # Elevated Job Failure Rate
+      - alert: ElevatedJobFailureRate
+        expr: |
+          (
+            rate(monitoring_worker_jobs_failed_total[5m]) /
+            rate(monitoring_worker_jobs_started_total[5m])
+          ) * 100 > 5
+        for: 5m
+        labels:
+          severity: warning
+          service: monitoring-worker
+          category: reliability
+        annotations:
+          summary: "Elevated job failure rate"
+          description: "Job failure rate is {{ $value | humanizePercentage }} over the last 5 minutes"
+
+      # Slow Health Checks
+      - alert: SlowHealthChecks
+        expr: |
+          histogram_quantile(0.95, rate(monitoring_worker_check_duration_milliseconds_bucket[5m])) > 5000
+        for: 3m
+        labels:
+          severity: warning
+          service: monitoring-worker
+          category: performance
+        annotations:
+          summary: "Health checks are running slowly"
+          description: "95th percentile health check duration is {{ $value }}ms"
+
+      # No Jobs Started
+      - alert: NoJobsStarted
+        expr: |
+          increase(monitoring_worker_jobs_started_total[10m]) == 0
+        for: 10m
+        labels:
+          severity: warning
+          service: monitoring-worker
+          category: activity
+        annotations:
+          summary: "No monitoring jobs started"
+          description: "No monitoring jobs have been started in the last 10 minutes"
+
+      # Worker Restart Detected
+      - alert: WorkerRestarted
+        expr: |
+          increase(monitoring_worker_uptime_seconds[1m]) < 0
+        for: 0m
+        labels:
+          severity: warning
+          service: monitoring-worker
+          category: availability
+        annotations:
+          summary: "MonitoringWorker has restarted"
+          description: "MonitoringWorker uptime has reset, indicating a restart"
+
+  - name: monitoring_worker_performance
+    rules:
+      # High Memory Usage
+      - alert: HighMemoryUsage
+        expr: |
+          (process_resident_memory_bytes{job="monitoring-worker"} / 1024 / 1024) > 500
+        for: 5m
+        labels:
+          severity: warning
+          service: monitoring-worker
+          category: resources
+        annotations:
+          summary: "High memory usage"
+          description: "MonitoringWorker is using {{ $value }}MB of memory"
+
+      # High CPU Usage
+      - alert: HighCPUUsage
+        expr: |
+          rate(process_cpu_seconds_total{job="monitoring-worker"}[5m]) * 100 > 80
+        for: 5m
+        labels:
+          severity: warning
+          service: monitoring-worker
+          category: resources
+        annotations:
+          summary: "High CPU usage"
+          description: "MonitoringWorker CPU usage is {{ $value | humanizePercentage }}"
+
+      # Too Many Active HTTP Requests
+      - alert: TooManyActiveRequests
+        expr: |
+          http_server_active_requests{job="monitoring-worker"} > 50
+        for: 2m
+        labels:
+          severity: warning
+          service: monitoring-worker
+          category: performance
+        annotations:
+          summary: "Too many active HTTP requests"
+          description: "{{ $value }} active HTTP requests detected"
+
+  - name: monitoring_worker_sla
+    rules:
+      # SLA: Availability
+      - alert: AvailabilitySLABreach
+        expr: |
+          (
+            avg_over_time(up{job="monitoring-worker"}[1h]) * 100
+          ) < 99.5
+        for: 0m
+        labels:
+          severity: critical
+          service: monitoring-worker
+          category: sla
+          sla_type: availability
+        annotations:
+          summary: "Availability SLA breach"
+          description: "Availability over the last hour is {{ $value | humanizePercentage }}, below 99.5% SLA"
+
+      # SLA: Success Rate
+      - alert: SuccessRateSLABreach
+        expr: |
+          (
+            rate(monitoring_worker_jobs_completed_total[1h]) /
+            rate(monitoring_worker_jobs_started_total[1h])
+          ) * 100 < 95
+        for: 0m
+        labels:
+          severity: critical
+          service: monitoring-worker
+          category: sla
+          sla_type: success_rate
+        annotations:
+          summary: "Success rate SLA breach"
+          description: "Job success rate over the last hour is {{ $value | humanizePercentage }}, below 95% SLA"
+
+      # SLA: Response Time
+      - alert: ResponseTimeSLABreach
+        expr: |
+          histogram_quantile(0.95, rate(monitoring_worker_check_duration_milliseconds_bucket[1h])) > 3000
+        for: 0m
+        labels:
+          severity: warning
+          service: monitoring-worker
+          category: sla
+          sla_type: response_time
+        annotations:
+          summary: "Response time SLA breach"
+          description: "95th percentile response time over the last hour is {{ $value }}ms, above 3000ms SLA"
+
+  - name: monitoring_worker_anomaly
+    rules:
+      # Anomaly: Sudden Spike in Failures
+      - alert: SuddenFailureSpike
+        expr: |
+          (
+            rate(monitoring_worker_jobs_failed_total[5m]) -
+            rate(monitoring_worker_jobs_failed_total[1h] offset 1h)
+          ) > 0.1
+        for: 2m
+        labels:
+          severity: warning
+          service: monitoring-worker
+          category: anomaly
+        annotations:
+          summary: "Sudden spike in job failures"
+          description: "Job failure rate has increased significantly compared to the same time yesterday"
+
+      # Anomaly: Unusual Check Duration Pattern
+      - alert: UnusualCheckDuration
+        expr: |
+          (
+            histogram_quantile(0.95, rate(monitoring_worker_check_duration_milliseconds_bucket[5m])) /
+            histogram_quantile(0.95, rate(monitoring_worker_check_duration_milliseconds_bucket[1h] offset 1h))
+          ) > 2
+        for: 3m
+        labels:
+          severity: warning
+          service: monitoring-worker
+          category: anomaly
+        annotations:
+          summary: "Unusual check duration pattern"
+          description: "Check durations are {{ $value }}x higher than usual"
+
+      # Anomaly: No Heartbeats
+      - alert: NoHeartbeats
+        expr: |
+          increase(monitoring_worker_heartbeat_total[5m]) == 0
+        for: 5m
+        labels:
+          severity: critical
+          service: monitoring-worker
+          category: anomaly
+        annotations:
+          summary: "No worker heartbeats detected"
+          description: "No heartbeats received from MonitoringWorker in the last 5 minutes"
+
+  - name: monitoring_worker_business
+    rules:
+      # Business: Low Monitoring Coverage
+      - alert: LowMonitoringCoverage
+        expr: |
+          monitoring_worker_total_checks < 10
+        for: 10m
+        labels:
+          severity: warning
+          service: monitoring-worker
+          category: business
+        annotations:
+          summary: "Low monitoring coverage"
+          description: "Only {{ $value }} total checks configured, consider adding more monitoring"
+
+      # Business: Monitoring Effectiveness
+      - alert: LowMonitoringEffectiveness
+        expr: |
+          (
+            rate(monitoring_worker_checks_total{status="healthy"}[1h]) /
+            rate(monitoring_worker_checks_total[1h])
+          ) * 100 > 98
+        for: 30m
+        labels:
+          severity: info
+          service: monitoring-worker
+          category: business
+        annotations:
+          summary: "Very high success rate - consider more comprehensive checks"
+          description: "Success rate is {{ $value | humanizePercentage }} - monitoring might not be comprehensive enough"

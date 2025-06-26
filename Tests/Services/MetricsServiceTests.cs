@@ -3,6 +3,7 @@ using Microsoft.Extensions.Logging;
 using MonitoringWorker.Models;
 using MonitoringWorker.Services;
 using Moq;
+using System.Diagnostics.Metrics;
 using Xunit;
 
 namespace MonitoringWorker.Tests.Services;
@@ -210,5 +211,84 @@ public class MetricsServiceTests
         metrics["check.check1.total"].Should().Be(2);
         metrics["check.check2.unhealthy"].Should().Be(1);
         metrics["check.check2.total"].Should().Be(1);
+    }
+
+    [Fact]
+    public void GetMonitoringMetrics_ReturnsCorrectStructure()
+    {
+        // Arrange
+        _service.RecordHeartbeat();
+        _service.RecordJobStart();
+        _service.RecordJobSuccess();
+        _service.RecordCheckResult("TestCheck", MonitoringStatus.Healthy, 100);
+        _service.RecordCheckResult("TestCheck", MonitoringStatus.Unhealthy, 200);
+
+        // Act
+        var monitoringMetrics = _service.GetMonitoringMetrics();
+
+        // Assert
+        monitoringMetrics.Should().NotBeNull();
+        monitoringMetrics.TotalJobs.Should().Be(1);
+        monitoringMetrics.SuccessfulJobs.Should().Be(1);
+        monitoringMetrics.FailedJobs.Should().Be(0);
+        monitoringMetrics.LastHeartbeat.Should().BeCloseTo(DateTime.UtcNow, TimeSpan.FromSeconds(5));
+        monitoringMetrics.Uptime.Should().BeGreaterThan(TimeSpan.Zero);
+    }
+
+    [Fact]
+    public void GetCurrentMetrics_ReturnsStructuredData()
+    {
+        // Arrange
+        _service.RecordHeartbeat();
+        _service.RecordJobStart();
+        _service.RecordCheckResult("TestCheck", MonitoringStatus.Healthy, 150);
+
+        // Act
+        var currentMetrics = _service.GetCurrentMetrics();
+
+        // Assert
+        currentMetrics.Should().NotBeNull();
+
+        // Use reflection to check the anonymous object structure
+        var metricsType = currentMetrics.GetType();
+        var countersProperty = metricsType.GetProperty("Counters");
+        var summaryProperty = metricsType.GetProperty("Summary");
+        var timestampProperty = metricsType.GetProperty("Timestamp");
+
+        countersProperty.Should().NotBeNull();
+        summaryProperty.Should().NotBeNull();
+        timestampProperty.Should().NotBeNull();
+
+        var timestamp = (DateTime)timestampProperty!.GetValue(currentMetrics)!;
+        timestamp.Should().BeCloseTo(DateTime.UtcNow, TimeSpan.FromSeconds(5));
+    }
+
+    [Fact]
+    public void GetMonitoringHistory_ReturnsHistoryStructure()
+    {
+        // Arrange
+        var timeSpan = TimeSpan.FromHours(1);
+        _service.RecordHeartbeat();
+
+        // Act
+        var history = _service.GetMonitoringHistory(timeSpan);
+
+        // Assert
+        history.Should().NotBeNull();
+
+        // Use reflection to check the anonymous object structure
+        var historyType = history.GetType();
+        var timeSpanProperty = historyType.GetProperty("TimeSpan");
+        var startTimeProperty = historyType.GetProperty("StartTime");
+        var endTimeProperty = historyType.GetProperty("EndTime");
+        var currentMetricsProperty = historyType.GetProperty("CurrentMetrics");
+
+        timeSpanProperty.Should().NotBeNull();
+        startTimeProperty.Should().NotBeNull();
+        endTimeProperty.Should().NotBeNull();
+        currentMetricsProperty.Should().NotBeNull();
+
+        var returnedTimeSpan = (TimeSpan)timeSpanProperty!.GetValue(history)!;
+        returnedTimeSpan.Should().Be(timeSpan);
     }
 }

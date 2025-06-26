@@ -1,0 +1,83 @@
+# Prometheus Configuration for MonitoringWorker
+# This configuration is optimized for local development and small team usage
+
+global:
+  # How frequently to scrape targets by default
+  scrape_interval: 15s
+  
+  # How frequently to evaluate rules
+  evaluation_interval: 15s
+  
+  # Attach these labels to any time series or alerts when communicating with external systems
+  external_labels:
+    monitor: 'monitoring-worker'
+    environment: 'development'
+
+# Alertmanager configuration
+alerting:
+  alertmanagers:
+    - static_configs:
+        - targets:
+          - localhost:9093
+
+# Load rules once and periodically evaluate them according to the global 'evaluation_interval'
+rule_files:
+  - "rules/*.yml"
+
+# Scrape configuration
+scrape_configs:
+  # The job name is added as a label `job=<job_name>` to any timeseries scraped from this config
+  - job_name: 'monitoring-worker'
+    
+    # Override the global default and scrape targets from this job every 10 seconds
+    scrape_interval: 10s
+    
+    # The HTTP resource path on which to fetch metrics from targets
+    metrics_path: '/metrics'
+    
+    # Scheme defaults to 'http'
+    scheme: http
+    
+    # Static configuration for local development
+    static_configs:
+      - targets: ['localhost:5002']
+        labels:
+          service: 'monitoring-worker'
+          instance: 'local-dev'
+    
+    # Optional: Add basic auth if you enable authentication later
+    # basic_auth:
+    #   username: 'admin'
+    #   password: 'your-password'
+    
+    # Scrape timeout (default is 10s)
+    scrape_timeout: 10s
+    
+    # Honor labels from the target
+    honor_labels: false
+    
+    # Sample limit per scrape (default is 0 = no limit)
+    sample_limit: 0
+
+  # Self-monitoring: Prometheus monitoring itself
+  - job_name: 'prometheus'
+    scrape_interval: 30s
+    static_configs:
+      - targets: ['localhost:9090']
+        labels:
+          service: 'prometheus'
+          instance: 'local-dev'
+
+  # Optional: Add Windows system metrics if you want OS-level monitoring
+  # - job_name: 'windows-exporter'
+  #   scrape_interval: 30s
+  #   static_configs:
+  #     - targets: ['localhost:9182']
+  #       labels:
+  #         service: 'windows-exporter'
+  #         instance: 'local-dev'
+
+# Storage configuration
+# For local development, we'll use default local storage
+# Data will be stored in ./data directory
+# Retention: 15 days (good for development)

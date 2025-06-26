@@ -1,0 +1,129 @@
+# Alerting Rules for MonitoringWorker
+# These rules define when to trigger alerts based on your metrics
+
+groups:
+  - name: monitoring-worker.rules
+    interval: 30s
+    rules:
+      
+      # Worker Health Alerts
+      - alert: MonitoringWorkerDown
+        expr: up{job="monitoring-worker"} == 0
+        for: 1m
+        labels:
+          severity: critical
+          service: monitoring-worker
+        annotations:
+          summary: "MonitoringWorker is down"
+          description: "MonitoringWorker has been down for more than 1 minute"
+          
+      - alert: MonitoringWorkerHighMemory
+        expr: process_resident_memory_bytes{job="monitoring-worker"} > 500000000  # 500MB
+        for: 5m
+        labels:
+          severity: warning
+          service: monitoring-worker
+        annotations:
+          summary: "MonitoringWorker high memory usage"
+          description: "MonitoringWorker is using more than 500MB of memory for 5 minutes"
+
+      # Job Performance Alerts
+      - alert: HighJobFailureRate
+        expr: |
+          (
+            rate(monitoring_worker_jobs_failed_total[5m]) / 
+            (rate(monitoring_worker_jobs_started_total[5m]) + 0.001)
+          ) > 0.1
+        for: 2m
+        labels:
+          severity: warning
+          service: monitoring-worker
+        annotations:
+          summary: "High job failure rate detected"
+          description: "Job failure rate is above 10% for the last 5 minutes"
+          
+      - alert: NoJobsStarted
+        expr: increase(monitoring_worker_jobs_started_total[10m]) == 0
+        for: 10m
+        labels:
+          severity: warning
+          service: monitoring-worker
+        annotations:
+          summary: "No jobs started recently"
+          description: "No jobs have been started in the last 10 minutes"
+
+      # Check Health Alerts
+      - alert: HighCheckFailureRate
+        expr: |
+          (
+            rate(monitoring_worker_checks_total{status="unhealthy"}[5m]) / 
+            (rate(monitoring_worker_checks_total[5m]) + 0.001)
+          ) > 0.2
+        for: 3m
+        labels:
+          severity: warning
+          service: monitoring-worker
+        annotations:
+          summary: "High check failure rate"
+          description: "Check failure rate is above 20% for the last 5 minutes"
+          
+      - alert: CriticalCheckFailing
+        expr: monitoring_worker_checks_total{status="error"} > 0
+        for: 1m
+        labels:
+          severity: critical
+          service: monitoring-worker
+        annotations:
+          summary: "Critical check errors detected"
+          description: "One or more checks are returning errors"
+
+      # Performance Alerts
+      - alert: HighResponseTime
+        expr: |
+          histogram_quantile(0.95, 
+            rate(monitoring_worker_check_duration_milliseconds_bucket[5m])
+          ) > 5000
+        for: 5m
+        labels:
+          severity: warning
+          service: monitoring-worker
+        annotations:
+          summary: "High response times detected"
+          description: "95th percentile response time is above 5 seconds"
+          
+      - alert: NoHeartbeat
+        expr: increase(monitoring_worker_heartbeat_total[2m]) == 0
+        for: 2m
+        labels:
+          severity: critical
+          service: monitoring-worker
+        annotations:
+          summary: "MonitoringWorker heartbeat missing"
+          description: "No heartbeat received from MonitoringWorker in the last 2 minutes"
+
+  # Recording Rules for better performance
+  - name: monitoring-worker.recording
+    interval: 30s
+    rules:
+      
+      # Job success rate (5-minute window)
+      - record: monitoring_worker:job_success_rate_5m
+        expr: |
+          rate(monitoring_worker_jobs_completed_total[5m]) / 
+          (rate(monitoring_worker_jobs_started_total[5m]) + 0.001)
+          
+      # Check success rate (5-minute window)
+      - record: monitoring_worker:check_success_rate_5m
+        expr: |
+          rate(monitoring_worker_checks_total{status="healthy"}[5m]) / 
+          (rate(monitoring_worker_checks_total[5m]) + 0.001)
+          
+      # Average check duration (5-minute window)
+      - record: monitoring_worker:avg_check_duration_5m
+        expr: |
+          rate(monitoring_worker_check_duration_milliseconds_sum[5m]) / 
+          rate(monitoring_worker_check_duration_milliseconds_count[5m])
+          
+      # Total requests per second
+      - record: monitoring_worker:requests_per_second
+        expr: rate(http_server_requests_total{job="monitoring-worker"}[1m])

@@ -1,54 +1,165 @@
 using MonitoringWorker.Models;
 using System.Collections.Concurrent;
+using System.Diagnostics.Metrics;
 
 namespace MonitoringWorker.Services;
 
 /// <summary>
-/// Implementation of the metrics service
+/// Implementation of the metrics service with OpenTelemetry integration and configurable features
 /// </summary>
 public class MetricsService : IMetricsService
 {
     private readonly ILogger<MetricsService> _logger;
+    private readonly IMonitoringConfigurationService _config;
     private readonly ConcurrentDictionary<string, long> _counters = new();
     private readonly ConcurrentDictionary<string, (long Sum, long Count)> _durations = new();
     private readonly object _lockObject = new();
     private readonly DateTime _startTime = DateTime.UtcNow;
     private DateTime _lastHeartbeat = DateTime.UtcNow;
 
-    public MetricsService(ILogger<MetricsService> logger)
+    // OpenTelemetry metrics (conditionally created based on configuration)
+    private static readonly Meter Meter = new("MonitoringWorker.Metrics", "1.0.0");
+    private readonly Counter<long>? _heartbeatCounter;
+    private readonly Counter<long>? _jobStartedCounter;
+    private readonly Counter<long>? _jobCompletedCounter;
+    private readonly Counter<long>? _jobFailedCounter;
+    private readonly Counter<long>? _jobCancelledCounter;
+    private readonly Counter<long>? _checkCounter;
+    private readonly Histogram<long>? _checkDurationHistogram;
+    private readonly ObservableGauge<double>? _uptimeGauge;
+    private readonly ObservableGauge<long>? _totalChecksGauge;
+
+    public MetricsService(
+        ILogger<MetricsService> logger,
+        IMonitoringConfigurationService config)
     {
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+        _config = config ?? throw new ArgumentNullException(nameof(config));
+
+        // Only initialize metrics if monitoring is enabled
+        if (!_config.IsMonitoringEnabled)
+        {
+            _logger.LogInformation("Monitoring is disabled - metrics collection will be minimal");
+            InitializeMetrics();
+            return;
+        }
+
+        _logger.LogInformation("Initializing metrics with configuration: Basic={Basic}, Detailed={Detailed}, System={System}",
+            _config.IsBasicMetricsEnabled, _config.IsDetailedMetricsEnabled, _config.IsSystemMetricsEnabled);
+
+        // Initialize basic metrics if enabled
+        if (_config.IsBasicMetricsEnabled)
+        {
+            _heartbeatCounter = Meter.CreateCounter<long>(
+                "monitoring_worker_heartbeat_total",
+                description: "Total number of worker heartbeats");
+
+            _jobStartedCounter = Meter.CreateCounter<long>(
+                "monitoring_worker_jobs_started_total",
+                description: "Total number of monitoring jobs started");
+
+            _jobCompletedCounter = Meter.CreateCounter<long>(
+                "monitoring_worker_jobs_completed_total",
+                description: "Total number of monitoring jobs completed successfully");
+
+            _jobFailedCounter = Meter.CreateCounter<long>(
+                "monitoring_worker_jobs_failed_total",
+                description: "Total number of monitoring jobs that failed");
+
+            _jobCancelledCounter = Meter.CreateCounter<long>(
+                "monitoring_worker_jobs_cancelled_total",
+                description: "Total number of monitoring jobs that were cancelled");
+
+            _checkCounter = Meter.CreateCounter<long>(
+                "monitoring_worker_checks_total",
+                description: "Total number of monitoring checks performed");
+
+            _uptimeGauge = Meter.CreateObservableGauge<double>(
+                "monitoring_worker_uptime_seconds",
+                description: "Worker uptime in seconds",
+                observeValue: () => (DateTime.UtcNow - _startTime).TotalSeconds);
+        }
+
+        // Initialize detailed metrics if enabled
+        if (_config.IsDetailedMetricsEnabled)
+        {
+            _checkDurationHistogram = Meter.CreateHistogram<long>(
+                "monitoring_worker_check_duration_milliseconds",
+                unit: "ms",
+                description: "Duration of monitoring checks in milliseconds");
+
+            _totalChecksGauge = Meter.CreateObservableGauge<long>(
+                "monitoring_worker_total_checks",
+                description: "Total number of checks performed",
+                observeValue: () => GetTotalChecks());
+        }
+
         InitializeMetrics();
     }
 
     public void RecordHeartbeat()
     {
-        IncrementCounter("worker.heartbeat");
+        if (!_config.IsMonitoringEnabled) return;
+
+        if (_config.IsBasicMetricsEnabled)
+        {
+            IncrementCounter("worker.heartbeat");
+            _heartbeatCounter?.Add(1);
+        }
+
         _lastHeartbeat = DateTime.UtcNow;
         _logger.LogTrace("Recorded heartbeat");
     }
 
     public void RecordJobStart()
     {
-        IncrementCounter("job.started");
+        if (!_config.IsMonitoringEnabled) return;
+
+        if (_config.IsBasicMetricsEnabled)
+        {
+            IncrementCounter("job.started");
+            _jobStartedCounter?.Add(1);
+        }
+
         _logger.LogDebug("Recorded job start");
     }
 
     public void RecordJobSuccess()
     {
-        IncrementCounter("job.completed");
+        if (!_config.IsMonitoringEnabled) return;
+
+        if (_config.IsBasicMetricsEnabled)
+        {
+            IncrementCounter("job.completed");
+            _jobCompletedCounter?.Add(1);
+        }
+
         _logger.LogDebug("Recorded job success");
     }
 
     public void RecordJobFailure()
     {
-        IncrementCounter("job.failed");
+        if (!_config.IsMonitoringEnabled) return;
+
+        if (_config.IsBasicMetricsEnabled)
+        {
+            IncrementCounter("job.failed");
+            _jobFailedCounter?.Add(1);
+        }
+
         _logger.LogDebug("Recorded job failure");
     }
 
     public void RecordJobCancellation()
     {
-        IncrementCounter("job.cancelled");
+        if (!_config.IsMonitoringEnabled) return;
+
+        if (_config.IsBasicMetricsEnabled)
+        {
+            IncrementCounter("job.cancelled");
+            _jobCancelledCounter?.Add(1);
+        }
+
         _logger.LogDebug("Recorded job cancellation");
     }
 
@@ -57,18 +168,38 @@ public class MetricsService : IMetricsService
         if (string.IsNullOrWhiteSpace(checkName))
             throw new ArgumentException("Check name cannot be null or empty", nameof(checkName));
 
+        if (!_config.IsMonitoringEnabled) return;
+
         var sanitizedName = SanitizeMetricName(checkName);
-        
-        // Record status-specific counter
-        IncrementCounter($"check.{sanitizedName}.{status.ToString().ToLowerInvariant()}");
-        
-        // Record overall check counter
-        IncrementCounter($"check.{sanitizedName}.total");
-        
-        // Record duration
-        RecordDuration($"check.{sanitizedName}.duration", durationMs);
-        
-        _logger.LogTrace("Recorded check result for {CheckName}: {Status} in {Duration}ms", 
+
+        // Record basic metrics if enabled
+        if (_config.IsBasicMetricsEnabled)
+        {
+            // Record status-specific counter
+            IncrementCounter($"check.{sanitizedName}.{status.ToString().ToLowerInvariant()}");
+
+            // Record overall check counter
+            IncrementCounter($"check.{sanitizedName}.total");
+
+            // Record OpenTelemetry check counter
+            _checkCounter?.Add(1,
+                new KeyValuePair<string, object?>("check_name", sanitizedName),
+                new KeyValuePair<string, object?>("status", status.ToString().ToLowerInvariant()));
+        }
+
+        // Record detailed metrics if enabled
+        if (_config.IsDetailedMetricsEnabled)
+        {
+            // Record duration
+            RecordDuration($"check.{sanitizedName}.duration", durationMs);
+
+            // Record OpenTelemetry duration histogram
+            _checkDurationHistogram?.Record(durationMs,
+                new KeyValuePair<string, object?>("check_name", sanitizedName),
+                new KeyValuePair<string, object?>("status", status.ToString().ToLowerInvariant()));
+        }
+
+        _logger.LogTrace("Recorded check result for {CheckName}: {Status} in {Duration}ms",
             checkName, status, durationMs);
     }
 
@@ -114,10 +245,10 @@ public class MetricsService : IMetricsService
                 FailedChecks = failedChecks,
                 ErrorChecks = errorChecks,
                 SuccessRate = Math.Round(successRate, 2),
-                TotalJobs = _counters.GetValueOrDefault("jobs.started", 0),
-                SuccessfulJobs = _counters.GetValueOrDefault("jobs.success", 0),
-                FailedJobs = _counters.GetValueOrDefault("jobs.failure", 0),
-                CancelledJobs = _counters.GetValueOrDefault("jobs.cancelled", 0),
+                TotalJobs = _counters.GetValueOrDefault("job.started", 0),
+                SuccessfulJobs = _counters.GetValueOrDefault("job.completed", 0),
+                FailedJobs = _counters.GetValueOrDefault("job.failed", 0),
+                CancelledJobs = _counters.GetValueOrDefault("job.cancelled", 0),
                 LastHeartbeat = _lastHeartbeat,
                 Uptime = DateTime.UtcNow - _startTime
             };
@@ -163,6 +294,12 @@ public class MetricsService : IMetricsService
         // Replace invalid characters with underscores
         return string.Concat(name.Where(c => char.IsLetterOrDigit(c) || c == '_' || c == '-'))
             .ToLowerInvariant();
+    }
+
+    private long GetTotalChecks()
+    {
+        return _counters.Values.Where((_, index) => _counters.Keys.ElementAtOrDefault(index)?.StartsWith("check.") == true)
+                              .Sum();
     }
 
     /// <summary>

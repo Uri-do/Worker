@@ -1,0 +1,205 @@
+# Alertmanager Configuration for MonitoringWorker
+# This configuration provides multiple notification channels with intelligent routing
+
+global:
+  # SMTP configuration for email notifications
+  smtp_smarthost: 'localhost:587'
+  smtp_from: 'monitoring@company.com'
+  smtp_auth_username: 'monitoring@company.com'
+  smtp_auth_password: 'your-email-password'
+  smtp_require_tls: true
+
+  # Slack configuration
+  slack_api_url: 'https://hooks.slack.com/services/YOUR/SLACK/WEBHOOK'
+
+  # Default notification templates
+  resolve_timeout: 5m
+
+# Routing configuration
+route:
+  # Default receiver for all alerts
+  receiver: 'default-notifications'
+  
+  # Group alerts by service and severity
+  group_by: ['service', 'severity', 'category']
+  
+  # Wait time before sending initial notification
+  group_wait: 30s
+  
+  # Wait time before sending additional notifications for the same group
+  group_interval: 5m
+  
+  # Wait time before sending repeat notifications
+  repeat_interval: 4h
+
+  # Routing rules
+  routes:
+    # Critical alerts - immediate notification to all channels
+    - match:
+        severity: critical
+      receiver: 'critical-alerts'
+      group_wait: 10s
+      group_interval: 2m
+      repeat_interval: 1h
+      
+    # SLA breach alerts - notify SLA team
+    - match:
+        category: sla
+      receiver: 'sla-team'
+      group_wait: 0s
+      repeat_interval: 30m
+      
+    # Performance alerts - notify performance team
+    - match:
+        category: performance
+      receiver: 'performance-team'
+      group_interval: 10m
+      repeat_interval: 2h
+      
+    # Business alerts - notify business stakeholders
+    - match:
+        category: business
+      receiver: 'business-team'
+      group_interval: 30m
+      repeat_interval: 12h
+      
+    # Warning alerts - standard notification
+    - match:
+        severity: warning
+      receiver: 'warning-alerts'
+      group_interval: 10m
+      repeat_interval: 6h
+
+# Inhibition rules - suppress certain alerts when others are firing
+inhibit_rules:
+  # Suppress warning alerts when critical alerts are firing for the same service
+  - source_match:
+      severity: 'critical'
+    target_match:
+      severity: 'warning'
+    equal: ['service']
+    
+  # Suppress individual component alerts when the main service is down
+  - source_match:
+      alertname: 'MonitoringWorkerDown'
+    target_match_re:
+      alertname: '(HighJobFailureRate|HealthCheckFailures|SlowHealthChecks)'
+    equal: ['service']
+
+# Notification receivers
+receivers:
+  # Default notifications
+  - name: 'default-notifications'
+    email_configs:
+      - to: 'team@company.com'
+        subject: '[{{ .Status | toUpper }}] MonitoringWorker Alert'
+        body: |
+          {{ range .Alerts }}
+          Alert: {{ .Annotations.summary }}
+          Description: {{ .Annotations.description }}
+          Severity: {{ .Labels.severity }}
+          Service: {{ .Labels.service }}
+          Time: {{ .StartsAt.Format "2006-01-02 15:04:05" }}
+          {{ if .Annotations.runbook_url }}
+          Runbook: {{ .Annotations.runbook_url }}
+          {{ end }}
+          {{ end }}
+
+  # Critical alerts - multiple channels
+  - name: 'critical-alerts'
+    email_configs:
+      - to: 'oncall@company.com'
+        subject: '[CRITICAL] MonitoringWorker Alert - Immediate Action Required'
+        body: |
+          🚨 CRITICAL ALERT 🚨
+          
+          {{ range .Alerts }}
+          Alert: {{ .Annotations.summary }}
+          Description: {{ .Annotations.description }}
+          Service: {{ .Labels.service }}
+          Time: {{ .StartsAt.Format "2006-01-02 15:04:05" }}
+          {{ if .Annotations.runbook_url }}
+          Runbook: {{ .Annotations.runbook_url }}
+          {{ end }}
+          {{ end }}
+          
+          Please investigate immediately.
+          
+    slack_configs:
+      - channel: '#alerts-critical'
+        title: 'Critical MonitoringWorker Alert'
+        text: |
+          {{ range .Alerts }}
+          🚨 *{{ .Annotations.summary }}*
+          
+          *Description:* {{ .Annotations.description }}
+          *Severity:* {{ .Labels.severity }}
+          *Service:* {{ .Labels.service }}
+          *Time:* {{ .StartsAt.Format "2006-01-02 15:04:05" }}
+          {{ if .Annotations.runbook_url }}
+          *Runbook:* {{ .Annotations.runbook_url }}
+          {{ end }}
+          {{ end }}
+        color: 'danger'
+        
+    webhook_configs:
+      - url: 'http://localhost:5000/api/alerts/webhook'
+        send_resolved: true
+
+  # SLA team notifications
+  - name: 'sla-team'
+    email_configs:
+      - to: 'sla-team@company.com'
+        subject: '[SLA BREACH] MonitoringWorker SLA Alert'
+        body: |
+          ⚠️ SLA BREACH DETECTED ⚠️
+          
+          {{ range .Alerts }}
+          Alert: {{ .Annotations.summary }}
+          Description: {{ .Annotations.description }}
+          SLA Type: {{ .Labels.sla_type }}
+          Service: {{ .Labels.service }}
+          Time: {{ .StartsAt.Format "2006-01-02 15:04:05" }}
+          {{ end }}
+          
+    slack_configs:
+      - channel: '#sla-monitoring'
+        title: 'SLA Breach Alert'
+        color: 'warning'
+
+  # Performance team notifications
+  - name: 'performance-team'
+    email_configs:
+      - to: 'performance-team@company.com'
+        subject: '[PERFORMANCE] MonitoringWorker Performance Alert'
+        
+    slack_configs:
+      - channel: '#performance-monitoring'
+        title: 'Performance Alert'
+        color: 'warning'
+
+  # Business team notifications
+  - name: 'business-team'
+    email_configs:
+      - to: 'business-team@company.com'
+        subject: '[BUSINESS] MonitoringWorker Business Alert'
+        
+    slack_configs:
+      - channel: '#business-monitoring'
+        title: 'Business Monitoring Alert'
+        color: '#439FE0'
+
+  # Warning alerts
+  - name: 'warning-alerts'
+    email_configs:
+      - to: 'team@company.com'
+        subject: '[WARNING] MonitoringWorker Warning'
+        
+    slack_configs:
+      - channel: '#alerts-warning'
+        title: 'MonitoringWorker Warning'
+        color: 'warning'
+
+# Templates for custom notification formatting
+templates:
+  - '/etc/alertmanager/templates/*.tmpl'
